@@ -9,4 +9,8 @@ include("spectral_ranges.jl")
 
 include("leja.jl")
 include("fast_leja.jl")
+
+include("divided_differences.jl")
+include("newton.jl")
+
 end # module
