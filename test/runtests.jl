@@ -1,6 +1,7 @@
 using MatrixPolynomials
 using Test
 
-@testset "MatrixPolynomials.jl" begin
-    # Write your own tests here.
-end
+using LinearAlgebra
+import MatrixPolynomials: Line, Rectangle, spectral_range
+
+include("spectral.jl")

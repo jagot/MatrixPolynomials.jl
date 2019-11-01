@@ -1,5 +1,10 @@
 module MatrixPolynomials
 
-greet() = print("Hello World!")
+using Parameters
+using LinearAlgebra
+using ArnoldiMethod
+
+include("spectral_shapes.jl")
+include("spectral_ranges.jl")
 
 end # module
