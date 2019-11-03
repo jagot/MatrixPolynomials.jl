@@ -12,37 +12,6 @@ end
 
 # * Special cases for φₖ(z)
 
-function φ₁(x::T) where T
-    if abs(x) < eps(real(T))
-        one(T)
-    else
-        y = exp(x)
-        if abs(x) ≥ one(real(T))
-            (y - 1)/x
-        else
-            (y-1)/log(y)
-        end
-    end
-end
-
-function φ(k, z)
-    if k == 0
-        exp(z)
-    elseif k == 1
-        φ₁(z)
-    else
-        iszero(z) && return 1/factorial(k)
-        # Eq. (2.11) of
-        #
-        # - Hochbruck, M., & Ostermann, A. (2010). Exponential Integrators. Acta
-        #   Numerica, 19(nil),
-        #   209–286. http://dx.doi.org/10.1017/s0962492910000048
-        #
-        # This is probably not numerically stable for abs(z) ≈ 0
-        (φ(k-1, z) - φ(k-1, 0))/z
-    end
-end
-
 # Algorithm in Table 2 of
 #
 # - Caliari, M. (2007). Accurate evaluation of divided differences for

@@ -18,9 +18,14 @@ jobs:
   include:
     - stage: Documentation
       julia: 1.0
-      script: julia --project=docs -e '
+      env:
+        - PYTHON=""
+      script:
+        - julia --project=docs/ -e 'using Pkg; pkg"add PyCall PyPlot https://github.com/jagot/Jagot.jl.git https://github.com/jagot/PyPlotRecipes.jl.git Colors LinearAlgebra"'
+        - julia --project=docs -e '
           using Pkg;
           Pkg.develop(PackageSpec(path=pwd()));
-          Pkg.instantiate();
-          include("docs/make.jl");'
+          Pkg.instantiate()'
+        - julia --project=docs/ -e 'using Pkg; pkg"build PyPlot"'
+        - julia --project=docs/ docs/make.jl
       after_success: skip
