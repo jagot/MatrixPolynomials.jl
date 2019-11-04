@@ -5,6 +5,7 @@
 These are defined recursively through
 ```math
 \begin{equation}
+\label{eqn:phi-k-recursive}
 \varphi_0(z) \defd \ce^z, \quad
 \varphi_1(z) \defd \frac{\ce^z-1}{z}, \quad
 \varphi_{k+1}(z) \defd \frac{\varphi_k(z)-\varphi_k(0)}{z}, \quad
@@ -134,7 +135,12 @@ seems higher, so ``n`` is currently set to ``10k``.
 
 ![Illustration of φ₁ accuracy](figures/phi_k_accuracy.svg)
 
-The plot includes ``\phi_k(z)`` for ``k\in\{0..100\}``.
+The plot includes ``\phi_k(z)`` for ``k\in\{0..100\}``. To illustrate
+the rounding errors that would occur if one were to use the recursive
+definition ``\eqref{eqn:phi-k-recursive}`` directly , we plot
+``\varphi_k(x)``, but for ``k\in\{0..4\}`` only:
+
+![Illustration of φ₁ accuracy](figures/phi_k_naive_accuracy.svg)
 
 ## Reference
 
