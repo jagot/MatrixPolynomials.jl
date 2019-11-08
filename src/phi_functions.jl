@@ -67,3 +67,49 @@ function φ(k, z::T) where T
         end
     end
 end
+
+"""
+    φ(k)
+
+Return a function corresponding to `φₖ`.
+
+# Examples
+
+```jldoctest
+julia> φ(0)
+exp (generic function with 14 methods)
+
+julia> φ(1)
+φ₁ (generic function with 1 method)
+
+julia> φ(2)
+φ₂ (generic function with 1 method)
+
+julia> φ(15)
+φ₁₅ (generic function with 1 method)
+
+julia> φ(15)(5.0 + im)
+1.0931836313419128e-12 + 9.301475570434819e-14im
+```
+"""
+function φ(k::Integer)
+    if k == 0
+        exp
+    elseif k == 1
+        φ₁
+    else
+        Base.Fix1(φ, k)
+    end
+end
+
+Base.string(f::Base.Fix1{typeof(φ),<:Integer}) = "φ$(to_subscript(f.x))"
+
+function Base.show(io::IO, f::Base.Fix1{typeof(φ),<:Integer})
+    write(io, "φ")
+    write(io, to_subscript(f.x))
+    n = length(methods(f))
+    write(io, " (generic function with $n method$(n > 1 ? "s" : ""))")
+end
+
+Base.show(io::IO, ::MIME"text/plain", f::Base.Fix1{typeof(φ),<:Integer}) =
+    show(io, f)

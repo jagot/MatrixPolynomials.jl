@@ -4,6 +4,7 @@ using Parameters
 using LinearAlgebra
 using ArnoldiMethod
 using SpecialFunctions
+using UnicodeFun
 
 include("spectral_shapes.jl")
 include("spectral_ranges.jl")
