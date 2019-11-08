@@ -8,6 +8,7 @@ makedocs(;
     pages=[
         "Home" => "index.md",
         "φₖ functions" => "phi_functions.md",
+        "Divided differences" => "divided_differences.md",
         "Newton polynomials" => "newton_polynomials.md"
     ],
     repo="https://github.com/jagot/MatrixPolynomials.jl/blob/{commit}{path}#L{line}",

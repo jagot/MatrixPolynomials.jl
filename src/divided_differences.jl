@@ -1,3 +1,10 @@
+"""
+    std_div_diff(f, ξ, h, c, γ)
+
+Compute the divided differences of `f` at `h*(c .+ γ*ξ)`, where `ξ` is
+a vector of (possibly complex) interpolation points, using the
+standard recursion formula.
+"""
 function std_div_diff(f, ξ::AbstractVector{T}, h, c, γ) where T
     m = length(ξ)
     d = Vector{T}(undef, m)
@@ -10,14 +17,31 @@ function std_div_diff(f, ξ::AbstractVector{T}, h, c, γ) where T
     d
 end
 
+"""
+    ⍋(f, ξ, args...)
+
+Compute the divided differences of `f` at `ξ`, using a method that is
+optimized for the function `f`, if one is available, otherwise
+fallback to [`MatrixPolynomials.std_div_diff`](@ref).
+"""
+⍋(args...) = std_div_diff(args...)
+
 # * Special cases for φₖ(z)
 
-# Algorithm in Table 2 of
-#
-# - Caliari, M. (2007). Accurate evaluation of divided differences for
-#   polynomial interpolation of exponential propagators. Computing,
-#   80(2), 189–201. http://dx.doi.org/10.1007/s00607-007-0227-1
-function φₖ_ts_div_diff(k, ξ::AbstractVector{T}, h, c, γ, τ) where T
+"""
+    φₖ_ts_div_diff(k, ξ, h, c, γ[, τ=1])
+
+Compute the divided differences of `φₖ` at `τ*h*(c .+ γ*ξ)`, where `ξ`
+is a vector of (possibly complex) interpolation points, using the
+algorithm in Table 2 of
+
+- Caliari, M. (2007). Accurate evaluation of divided differences for
+  polynomial interpolation of exponential propagators. Computing,
+  80(2), 189–201. [DOI: 10.1007/s00607-007-0227-1](http://dx.doi.org/10.1007/s00607-007-0227-1)
+"""
+function φₖ_ts_div_diff(k, ξ::AbstractVector{T}, h, c, γ, τ=one(T)) where T
+    τxmax = maximum(ξᵢ -> abs(τ*h*(c + γ*ξᵢ)), ξ)
+    τxmax > 1.59 && @warn("Taylor series only valid for |τ*max(x)| < 1.59, got $(τxmax)")
     m = length(ξ)
     F = Matrix{T}(undef, m, m)
     for i = 1:m
@@ -39,3 +63,7 @@ function φₖ_ts_div_diff(k, ξ::AbstractVector{T}, h, c, γ, τ) where T
     end
     F[:,1]
 end
+
+⍋(::typeof(exp), args...) = φₖ_ts_div_diff(0, args...)
+⍋(::typeof(φ₁), args...) = φₖ_ts_div_diff(1, args...)
+⍋(fix::Base.Fix1{typeof(φ),<:Integer}, args...) = φₖ_ts_div_diff(fix.x, args...)

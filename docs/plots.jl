@@ -2,7 +2,7 @@ using PyPlot
 using Jagot.plotting
 plot_style("ggplot")
 
-import MatrixPolynomials: φ₁, φ
+import MatrixPolynomials: φ₁, φ, std_div_diff, ⍋
 using SpecialFunctions
 
 function φ₁_accuracy()
@@ -59,6 +59,26 @@ function φₖ_accuracy()
     savefig("docs/src/figures/phi_k_naive_accuracy.svg")
 end
 
+function div_differences_cancellation()
+    x = range(-2, stop=2, length=100)
+    ξ = x
+    f = exp
+    d_std = @time std_div_diff(f, ξ, 1, 0, 1)
+    d_std_big = @time std_div_diff(f, big.(ξ), 1, 0, 1)
+    d_auto = @time ⍋(f, ξ, 1, 0, 1)
+
+    cfigure("div differences cancellation") do
+        loglog(d_std, label="Recursive")
+        loglog(Float64.(d_std_big), label="Recursive, BigFloat")
+        loglog(d_auto, "--", label="Taylor series")
+        xlabel(L"j")
+        ylabel(L"\Delta\!\!\!|\,(\zeta_{1:j})\exp")
+    end
+    legend(framealpha=0.75)
+
+    savefig("docs/src/figures/div_differences_cancellation.svg")
+end
+
 macro echo(expr)
     println(expr)
     :(@time $expr)
@@ -68,3 +88,4 @@ end
 mkpath("docs/src/figures")
 @echo φ₁_accuracy()
 @echo φₖ_accuracy()
+@echo div_differences_cancellation()
