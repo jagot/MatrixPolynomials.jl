@@ -115,7 +115,7 @@ interval ``[-1.59,1.59]``, so the domain of interest has to be
 rescaled prior to its usage.
 
 ```@docs
-MatrixPolynomials.⍋
+MatrixPolynomials.⏃
 MatrixPolynomials.std_div_diff
 MatrixPolynomials.φₖ_ts_div_diff
 ```

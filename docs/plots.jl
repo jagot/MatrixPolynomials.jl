@@ -2,7 +2,7 @@ using PyPlot
 using Jagot.plotting
 plot_style("ggplot")
 
-import MatrixPolynomials: φ₁, φ, std_div_diff, ⍋
+import MatrixPolynomials: φ₁, φ, std_div_diff, ⏃
 using SpecialFunctions
 
 function φ₁_accuracy()
@@ -65,7 +65,7 @@ function div_differences_cancellation()
     f = exp
     d_std = @time std_div_diff(f, ξ, 1, 0, 1)
     d_std_big = @time std_div_diff(f, big.(ξ), 1, 0, 1)
-    d_auto = @time ⍋(f, ξ, 1, 0, 1)
+    d_auto = @time ⏃(f, ξ, 1, 0, 1)
 
     cfigure("div differences cancellation") do
         loglog(d_std, label="Recursive")

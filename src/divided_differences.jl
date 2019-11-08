@@ -18,13 +18,13 @@ function std_div_diff(f, ξ::AbstractVector{T}, h, c, γ) where T
 end
 
 """
-    ⍋(f, ξ, args...)
+    ⏃(f, ξ, args...)
 
 Compute the divided differences of `f` at `ξ`, using a method that is
 optimized for the function `f`, if one is available, otherwise
 fallback to [`MatrixPolynomials.std_div_diff`](@ref).
 """
-⍋(args...) = std_div_diff(args...)
+⏃(args...) = std_div_diff(args...)
 
 # * Special cases for φₖ(z)
 
@@ -64,6 +64,6 @@ function φₖ_ts_div_diff(k, ξ::AbstractVector{T}, h, c, γ, τ=one(T)) where 
     F[:,1]
 end
 
-⍋(::typeof(exp), args...) = φₖ_ts_div_diff(0, args...)
-⍋(::typeof(φ₁), args...) = φₖ_ts_div_diff(1, args...)
-⍋(fix::Base.Fix1{typeof(φ),<:Integer}, args...) = φₖ_ts_div_diff(fix.x, args...)
+⏃(::typeof(exp), args...) = φₖ_ts_div_diff(0, args...)
+⏃(::typeof(φ₁), args...) = φₖ_ts_div_diff(1, args...)
+⏃(fix::Base.Fix1{typeof(φ),<:Integer}, args...) = φₖ_ts_div_diff(fix.x, args...)

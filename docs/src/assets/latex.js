@@ -22,11 +22,9 @@ require(['mathjax'], function(MathJax) {
                 im: "\\mathrm{i}",
                 diff : ["\\mathrm{d}#1\\,",1],
                 Beta : "\\mathrm{B}", // You've gotta be kidding
-                divdiff : "⍋",
+                divdiff : "⏃",
                 bmat: ["\\begin{bmatrix}#1\\end{bmatrix}",1]
             }
         }
     });
 })
-
-
