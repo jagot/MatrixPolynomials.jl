@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Divided differences · MatrixPolynomials.jl</title><link href="https://cdnjs.cloudflare.com/ajax/libs/normalize/4.2.0/normalize.min.css" rel="stylesheet" type="text/css"/><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.2.0/require.min.js" data-main="../assets/documenter.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link href="../assets/documenter.css" rel="stylesheet" type="text/css"/><script src="../assets/latex.js"></script></head><body><nav class="toc"><h1>MatrixPolynomials.jl</h1><select id="version-selector" onChange="window.location.href=this.value" style="visibility: hidden"></select><form class="search" id="search-form" action="../search/"><input id="search-query" name="q" type="text" placeholder="Search docs"/></form><ul><li><a class="toctext" href="../">Home</a></li><li><a class="toctext" href="../phi_functions/">φₖ functions</a></li><li class="current"><a class="toctext" href>Divided differences</a><ul class="internal"><li><a class="toctext" href="#Bibliography-1">Bibliography</a></li></ul></li><li><a class="toctext" href="../newton_polynomials/">Newton polynomials</a></li></ul></nav><article id="docs"><header><nav><ul><li><a href>Divided differences</a></li></ul><a class="edit-page" href="https://github.com/jagot/MatrixPolynomials.jl/blob/master/docs/src/divided_differences.md#L"><span class="fa"></span> Edit on GitHub</a></nav><hr/><div id="topbar"><span>Divided differences</span><a class="fa fa-bars" href="#"></a></div></header><h1><a class="nav-anchor" id="Divided-differences-1" href="#Divided-differences-1">Divided differences</a></h1><p>The divided differences of a function <span>$f$</span> with respect to a set of interpolation points <span>$\{\zeta_i\}$</span> is defined as (<a href="#Bibliography-1">McCurdy 1984</a>)</p><div>\[\begin{equation}
+\label{eqn:div-diff-def}
+\divdiff(\zeta_{i:j})f \defd
+\frac{1}{2\pi\im}
+\oint
+\diff{z}
+\frac{f(z)}{(z-\zeta_i)(z-\zeta_{i+1})...(z-\zeta_j)},
+\end{equation}\]</div><p>where the integral is taken along a simple contour encircling the poles once. A common approach to evaluate the divided differences of <span>$f$</span>, and an alternative definition, is the recursive scheme</p><div>\[\begin{equation}
+\label{eqn:div-diff-recursive}
+\tag{\ref{eqn:div-diff-def}*}
+\divdiff(\zeta_{i:j},z)f \defd
+\frac{\divdiff(\zeta_{i:j-1},z)f-\divdiff(\zeta_{i:j})f}{z - \zeta_j}, \quad
+\divdiff(\zeta_i,z)f \defd
+\frac{\divdiff(z)f-\divdiff(\zeta_i)f}{z - \zeta_i}, \quad
+\divdiff(z)f \defd f(z),
+\end{equation}\]</div><p>which, however, is prone to catastrophic cancellation for very small <span>$\abs{\zeta_i-\zeta_j}$</span>. This can be partially alleviated by employing <code>BigFloat</code>s, but that will only postpone the breakdown, albeit with ~40 orders of magnitude, which might be enough for practical purposes (but much slower).</p><p>For specific choices of <span>$f$</span>, efficient and accurate algorithms can be devised. <a href="#MatrixPolynomials.φₖ_ts_div_diff"><code>MatrixPolynomials.φₖ_ts_div_diff</code></a> is based upon the fact the divided differences in a third way can be computed as (<a href="#Bibliography-1">McCurdy 1984</a>, <a href="#Bibliography-1">Opitz 1964</a>)</p><div>\[\begin{equation}
+\label{eqn:div-diff-mat-fun}
+\tag{\ref{eqn:div-diff-def}†}
+\divdiff(\zeta_{i:j})f \defd
+\vec{e}_1^\top
+f(\mat{Z}_{i:j}),
+\end{equation}\]</div><p>i.e. the first row of the function <span>$f$</span> applied to the matrix</p><div>\[\begin{equation}
+\mat{Z}_{i:j}\defd
+\bmat{
+\zeta_i&amp;1&amp;\\
+&amp;\zeta_{i+1}&amp;1\\
+&amp;&amp;\ddots&amp;\ddots\\
+&amp;&amp;&amp;\ddots&amp;1\\
+&amp;&amp;&amp;&amp;\zeta_j}.
+\end{equation}\]</div><p>The right-eigenvectors are given by (<a href="#Bibliography-1">Opitz 1964</a>)</p><div>\[\begin{equation}
+\label{eqn:div-diff-mat-right-eigen}
+\mat{Q}_\zeta = \{q_{ik}\}, \quad
+q_{ik} =
+\begin{cases}
+\prod_{j=i}^{k-1} (x_k - x_j)^{-1}, &amp; i &lt; k,\\
+1, &amp; i = k,\\
+0, &amp; \textrm{else},
+\end{cases}
+\end{equation}\]</div><p>and similarly, the left-eigenvectors are given by</p><div>\[\begin{equation}
+\label{eqn:div-diff-mat-left-eigen}
+\tag{\ref{eqn:div-diff-mat-right-eigen}*}
+\mat{Q}_\zeta^{-1} = \{\conj{q}_{ik}\}, \quad
+\conj{q}_{ik} =
+\begin{cases}
+\prod_{j=i+1}^k (x_i - x_j)^{-1}, &amp; i &lt; k,\\
+1, &amp; i = k,\\
+0, &amp; \textrm{else},
+\end{cases}
+\end{equation}\]</div><p>such that</p><div>\[\begin{equation}
+\divdiff(\zeta_{i:j})f=
+\mat{Q}_\zeta\mat{F}_\zeta\mat{Q}_\zeta^{-1},\quad
+\mat{F}_\zeta \defd \bmat{f(\zeta_i)\\&amp;f(\zeta_{i+1})\\&amp;&amp;\ddots\\&amp;&amp;&amp;f(\zeta_j)}.
+\end{equation}\]</div><p>However, straight evaluation of <span>$(\ref{eqn:div-diff-mat-right-eigen},\ref{eqn:div-diff-mat-left-eigen})$</span> is prone to the same kind of catastrophic cancellation as is <span>$\eqref{eqn:div-diff-recursive}$</span>, so to evaluate <span>$\eqref{eqn:div-diff-mat-fun}$</span>, one instead turns to Taylor or <a href="https://en.wikipedia.org/wiki/Pad%C3%A9_approximant">Padé</a> expansions of <span>$f(\mat{Z}_{i:j})$</span>.</p><p>As an illustration, we show the divided differences of <code>exp</code> over 100 points uniformly spread over <span>$[-2,2]$</span>, calculated using <span>$\eqref{eqn:div-diff-recursive}$</span>, in <code>Float64</code> and <code>BigFloat</code> precision, along with a Taylor expansion of <span>$\eqref{eqn:div-diff-mat-fun}$</span>:</p><p><img src="../figures/div_differences_cancellation.svg" alt="Illustration of divided differences accuracy"/></p><p>It can clearly be seen that the Taylor expansion is not susceptible to the catastrophic cancellation; it is however, not valid outside the interval <span>$[-1.59,1.59]$</span>, so the domain of interest has to be rescaled prior to its usage.</p><section class="docstring"><div class="docstring-header"><a class="docstring-binding" id="MatrixPolynomials.⍋" href="#MatrixPolynomials.⍋"><code>MatrixPolynomials.⍋</code></a> — <span class="docstring-category">Function</span>.</div><div><div><pre><code class="language-julia">⍋(f, ξ, args...)</code></pre><p>Compute the divided differences of <code>f</code> at <code>ξ</code>, using a method that is optimized for the function <code>f</code>, if one is available, otherwise fallback to <a href="#MatrixPolynomials.std_div_diff"><code>MatrixPolynomials.std_div_diff</code></a>.</p></div></div><a class="source-link" target="_blank" href="https://github.com/jagot/MatrixPolynomials.jl/blob/8e28632711fc1e7a675c7f0cc1784cb365b0652e/src/divided_differences.jl#LL20-L26">source</a></section><section class="docstring"><div class="docstring-header"><a class="docstring-binding" id="MatrixPolynomials.std_div_diff" href="#MatrixPolynomials.std_div_diff"><code>MatrixPolynomials.std_div_diff</code></a> — <span class="docstring-category">Function</span>.</div><div><div><pre><code class="language-julia">std_div_diff(f, ξ, h, c, γ)</code></pre><p>Compute the divided differences of <code>f</code> at <code>h*(c .+ γ*ξ)</code>, where <code>ξ</code> is a vector of (possibly complex) interpolation points, using the standard recursion formula.</p></div></div><a class="source-link" target="_blank" href="https://github.com/jagot/MatrixPolynomials.jl/blob/8e28632711fc1e7a675c7f0cc1784cb365b0652e/src/divided_differences.jl#LL1-L7">source</a></section><section class="docstring"><div class="docstring-header"><a class="docstring-binding" id="MatrixPolynomials.φₖ_ts_div_diff" href="#MatrixPolynomials.φₖ_ts_div_diff"><code>MatrixPolynomials.φₖ_ts_div_diff</code></a> — <span class="docstring-category">Function</span>.</div><div><div><pre><code class="language-julia">φₖ_ts_div_diff(k, ξ, h, c, γ[, τ=1])</code></pre><p>Compute the divided differences of <code>φₖ</code> at <code>τ*h*(c .+ γ*ξ)</code>, where <code>ξ</code> is a vector of (possibly complex) interpolation points, using the algorithm in Table 2 of</p><ul><li>Caliari, M. (2007). Accurate evaluation of divided differences for polynomial interpolation of exponential propagators. Computing, 80(2), 189–201. <a href="http://dx.doi.org/10.1007/s00607-007-0227-1">DOI: 10.1007/s00607-007-0227-1</a></li></ul></div></div><a class="source-link" target="_blank" href="https://github.com/jagot/MatrixPolynomials.jl/blob/8e28632711fc1e7a675c7f0cc1784cb365b0652e/src/divided_differences.jl#LL31-L41">source</a></section><h2><a class="nav-anchor" id="Bibliography-1" href="#Bibliography-1">Bibliography</a></h2><ul><li><p>McCurdy, A. C., Ng, K. C., &amp; Parlett, B. N. (1984). Accurate computation of divided differences of the exponential function. Mathematics of Computation, 43(168), 501–501. <a href="http://dx.doi.org/10.1090/s0025-5718-1984-0758198-0">DOI: 10.1090/s0025-5718-1984-0758198-0</a></p></li><li><p>Opitz, G. (1964). Steigungsmatrizen. ZAMM - Journal of Applied Mathematics and Mechanics / Zeitschrift für Angewandte Mathematik und Mechanik, 44(S1), <a href="http://dx.doi.org/10.1002/zamm.19640441321">DOI: 10.1002/zamm.19640441321</a></p></li></ul><footer><hr/><a class="previous" href="../phi_functions/"><span class="direction">Previous</span><span class="title">φₖ functions</span></a><a class="next" href="../newton_polynomials/"><span class="direction">Next</span><span class="title">Newton polynomials</span></a></footer></article></body></html>
