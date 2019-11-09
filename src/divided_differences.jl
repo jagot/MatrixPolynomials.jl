@@ -88,15 +88,15 @@ min_degree(::typeof(exp), θ::Float32) =
     ceil(Int, 3.7037θ + 6.8519)
 
 """
-    taylor_series(::typeof(exp), n; s=1, θ=3.5)
+    taylor_series(::Type{T}, ::typeof(exp), n; s=1, θ=3.5) where T
 
 Compute the Taylor series of `exp(z/s)`, with `n` terms, or as many
 terms as required to achieve convergence within a circle of radius
 `θ`, whichever is largest.
 """
-function taylor_series(::typeof(exp), n; s=1, θ=3.5)
+function taylor_series(::Type{T}, ::typeof(exp), n; s=1, θ=3.5) where T
     N = max(n, min_degree(exp, θ))
-    vcat(1, 1 ./ [Γ(s*k+1) for k = 1:N])
+    vcat(one(T), one(T) ./ [Γ(s*k+1) for k = 1:N])
 end
 
 """
@@ -112,7 +112,7 @@ points `ζ`, based on the algorithm on page 26 of
 """
 function div_diff_table(f, ζ::AbstractVector{T}; s=1, kwargs...) where T
     n = length(ζ)-1
-    ts = taylor_series(f, n+1; s=s, kwargs...)
+    ts = taylor_series(T, f, n+1; s=s, kwargs...)
     N = length(ts)-1
 
     F = zeros(T, n+1, n+1)
@@ -142,7 +142,7 @@ functions. `θ` is the desired radius of convergence of the Taylor
 series of `φₖ`, and `s` is the scaling-and-squaring parameter, which
 if set to zero, will be calculated to fulfill `θ`.
 """
-function φₖ_div_diff(k, ξ::AbstractVector{T}; θ=T(3.5), s=1) where T
+function φₖ_div_diff(k, ξ::AbstractVector{T}; θ=real(T(3.5)), s=1) where T
     μ = mean(ξ)
     z = vcat(zeros(k), ξ) .- μ
     n = length(z) - 1

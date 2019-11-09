@@ -10,11 +10,11 @@ where `ζ` are the interpolation points and
 `d[j]=f[ζ₁,...,ζⱼ]` is the ``j``th divided difference of the
 interpolated function `f`.
 """
-struct NewtonPolynomial{T,VT<:AbstractVector{T}}
+struct NewtonPolynomial{T,ZT<:AbstractVector{T},DT<:AbstractVector{T}}
     "Interpolation points of the Newton polynomial"
-    ζ::VT
+    ζ::ZT
     "Divided differences for the function interpolated by the Newton polynomial"
-    d::VT
+    d::DT
 end
 
 NewtonPolynomial(f::Function, ζ::AbstractVector) =
