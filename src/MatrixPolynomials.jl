@@ -4,6 +4,8 @@ using Parameters
 using LinearAlgebra
 using ArnoldiMethod
 using SpecialFunctions
+const Γ = gamma
+using Statistics
 using UnicodeFun
 
 include("spectral_shapes.jl")

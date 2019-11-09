@@ -65,7 +65,7 @@ The right-eigenvectors are given by ([Opitz 1964](#Bibliography-1))
 \mat{Q}_\zeta = \{q_{ik}\}, \quad
 q_{ik} =
 \begin{cases}
-\prod_{j=i}^{k-1} (x_k - x_j)^{-1}, & i < k,\\
+\prod_{j=i}^{k-1} (\zeta_k - \zeta_j)^{-1}, & i < k,\\
 1, & i = k,\\
 0, & \textrm{else},
 \end{cases}
@@ -79,7 +79,7 @@ and similarly, the left-eigenvectors are given by
 \mat{Q}_\zeta^{-1} = \{\conj{q}_{ik}\}, \quad
 \conj{q}_{ik} =
 \begin{cases}
-\prod_{j=i+1}^k (x_i - x_j)^{-1}, & i < k,\\
+\prod_{j=i+1}^k (\zeta_i - \zeta_j)^{-1}, & i < k,\\
 1, & i = k,\\
 0, & \textrm{else},
 \end{cases}
@@ -99,7 +99,9 @@ is prone to the same kind of catastrophic cancellation as is
 ``\eqref{eqn:div-diff-recursive}``, so to evaluate
 ``\eqref{eqn:div-diff-mat-fun}``, one instead turns to Taylor or
 [Padé](https://en.wikipedia.org/wiki/Pad%C3%A9_approximant) expansions
-of ``f(\mat{Z}_{i:j})``.
+of ``f(\mat{Z}_{i:j})`` ([McCurdy 1984](#Bibliography-1), [Caliari
+2004](#Bibliography-1)), or interpolation polynomial basis changes
+([Zivcovich 2019](#Bibliography-1)).
 
 As an illustration, we show the divided differences of `exp` over 100
 points uniformly spread over ``[-2,2]``, calculated using
@@ -118,9 +120,19 @@ rescaled prior to its usage.
 MatrixPolynomials.⏃
 MatrixPolynomials.std_div_diff
 MatrixPolynomials.φₖ_ts_div_diff
+MatrixPolynomials.φₖ_div_diff
+MatrixPolynomials.div_diff_table
+MatrixPolynomials.min_degree
+MatrixPolynomials.taylor_series
 ```
 
 ## Bibliography
+
+- Caliari, M. (2007). Accurate evaluation of divided differences for
+  polynomial interpolation of exponential propagators. Computing,
+  80(2), 189–201. [DOI:
+  10.1007/s00607-007-0227-1](http://dx.doi.org/10.1007/s00607-007-0227-1)
+
 
 - McCurdy, A. C., Ng, K. C., & Parlett, B. N. (1984). Accurate
   computation of divided differences of the exponential
@@ -131,3 +143,9 @@ MatrixPolynomials.φₖ_ts_div_diff
   Mathematics and Mechanics / Zeitschrift für Angewandte Mathematik
   und Mechanik, 44(S1), [DOI:
   10.1002/zamm.19640441321](http://dx.doi.org/10.1002/zamm.19640441321)
+
+- Zivcovich, F. (2019). Fast and accurate computation of divided
+  differences for analytic functions, with an application to the
+  exponential function. Dolomites Research Notes on Approximation,
+  12(1), 28–42. [PDF:
+  Zivcovich_2019_FAC.pdf](https://drna.padovauniversitypress.it/system/files/papers/Zivcovich_2019_FAC.pdf)

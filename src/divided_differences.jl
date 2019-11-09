@@ -46,7 +46,7 @@ function φₖ_ts_div_diff(k, ξ::AbstractVector{T}, h, c, γ, τ=one(T)) where 
     F = Matrix{T}(undef, m, m)
     for i = 1:m
         for j = 1:i
-            F[i,j] = F[j,i] = (τ*h*γ)^i/gamma(i+k-j+1)
+            F[i,j] = F[j,i] = (τ*h*γ)^i/Γ(i+k-j+1)
         end
     end
     for l = 2:17
@@ -67,3 +67,101 @@ end
 ⏃(::typeof(exp), args...) = φₖ_ts_div_diff(0, args...)
 ⏃(::typeof(φ₁), args...) = φₖ_ts_div_diff(1, args...)
 ⏃(fix::Base.Fix1{typeof(φ),<:Integer}, args...) = φₖ_ts_div_diff(fix.x, args...)
+
+# These are linear fits that are always above the values of Table 3.1 of
+#
+# - Al-Mohy, A. H., & Higham, N. J. (2011). Computing the action of the
+#   matrix exponential, with an application to exponential
+#   integrators. SIAM Journal on Scientific Computing, 33(2),
+#   488–511. http://dx.doi.org/10.1137/100788860
+
+"""
+    min_degree(::typeof(exp), θ)
+
+Minimum degree of Taylor polynomial to represent `exp` to machine
+precision, within a circle of radius `θ`.
+"""
+min_degree(::typeof(exp), θ::Float64) =
+    ceil(Int, 4.1666θ + 15.0)
+
+min_degree(::typeof(exp), θ::Float32) =
+    ceil(Int, 3.7037θ + 6.8519)
+
+"""
+    taylor_series(::typeof(exp), n; s=1, θ=3.5)
+
+Compute the Taylor series of `exp(z/s)`, with `n` terms, or as many
+terms as required to achieve convergence within a circle of radius
+`θ`, whichever is largest.
+"""
+function taylor_series(::typeof(exp), n; s=1, θ=3.5)
+    N = max(n, min_degree(exp, θ))
+    vcat(1, 1 ./ [Γ(s*k+1) for k = 1:N])
+end
+
+"""
+    div_diff_table(f, ζ[; kwargs...])
+
+Construct the table of divided differences of `f` at the interpolation
+points `ζ`, based on the algorithm on page 26 of
+
+- Zivcovich, F. (2019). Fast and accurate computation of divided
+  differences for analytic functions, with an application to the
+  exponential function. Dolomites Research Notes on Approximation,
+  12(1), 28–42.
+"""
+function div_diff_table(f, ζ::AbstractVector{T}; s=1, kwargs...) where T
+    n = length(ζ)-1
+    ts = taylor_series(f, n+1; s=s, kwargs...)
+    N = length(ts)-1
+
+    F = zeros(T, n+1, n+1)
+    for i = 1:n
+        F[i+1:n+1,i] .= ζ[i] .- ζ[i+1:n+1]
+    end
+
+    for j = n:-1:0
+        for k = N:-1:(n-j+1)
+            ts[k] += ζ[j+1]*ts[k+1]
+        end
+        for k = (n-j):-1:1
+            ts[k] += F[k+j+1,j+1]*ts[k+1]
+        end
+        F[j+1,j+1:n+1] .= ts[1:n-j+1]
+    end
+    F[1:n+2:(n+1)^2] .= f.(ζ/s)
+
+    UpperTriangular(F)
+end
+
+"""
+    φₖ_div_diff(k, ξ[; θ=3.5, s=1])
+
+Specialized interface to [`div_diff_table`](@ref) for the `φₖ`
+functions. `θ` is the desired radius of convergence of the Taylor
+series of `φₖ`, and `s` is the scaling-and-squaring parameter, which
+if set to zero, will be calculated to fulfill `θ`.
+"""
+function φₖ_div_diff(k, ξ::AbstractVector{T}; θ=T(3.5), s=1) where T
+    μ = mean(ξ)
+    z = vcat(zeros(k), ξ) .- μ
+    n = length(z) - 1
+
+    # Scaling
+    if s == 0
+        Δz = maximum(a -> maximum(b -> abs(a-b), z), z)
+        s = max(1, ceil(Int, Δz/θ))
+    end
+
+    # The Taylor series of φₖ is just a shifted version of exp.
+    F = div_diff_table(exp, z; s=s, θ=θ)
+
+    dd = F[1,:]
+
+    # Squaring
+    for j = 1:s-1
+        lmul!(F', dd)
+    end
+
+    exp(μ)*dd[k+1:end]
+end
