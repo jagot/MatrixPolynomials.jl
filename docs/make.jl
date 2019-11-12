@@ -1,4 +1,4 @@
-using Documenter, MatrixPolynomials
+using Documenter, MatrixPolynomials, LinearAlgebra
 
 isdefined(Main, :NOPLOTS) && NOPLOTS || include("plots.jl")
 
