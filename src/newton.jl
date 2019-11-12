@@ -118,3 +118,116 @@ function LinearAlgebra.mul!(w, nmp::NewtonMatrixPolynomial, A, v)
 
     w .= pv
 end
+
+# ** Newton matrix polynomial derivative
+
+struct NewtonMatrixPolynomialDerivative{T,NP<:NewtonPolynomial{T},Vec}
+    np::NP
+    "Action of the time-derivative of the Newton polynomial `np` on a vector `v`"
+    p′v::Vec
+    "Recurrence vector"
+    r′::Vec
+    "Matrix–Recurrence vector product"
+    Ar′::Vec
+end
+
+function NewtonMatrixPolynomialDerivative(np::NewtonPolynomial{T}, n::Integer) where T
+    p′v = Vector{T}(undef, n)
+    r′ = Vector{T}(undef, n)
+    Ar′ = Vector{T}(undef, n)
+    NewtonMatrixPolynomialDerivative(np, p′v, r′, Ar′)
+end
+
+function step!(nmpd::NewtonMatrixPolynomialDerivative, A, Ar, i)
+    @unpack p′v,r′,Ar′ = nmpd
+    @unpack d,ζ = nmpd.np
+
+    if i == 1
+        # Equation (18c)
+        p′v .= false
+        copyto!(r′, Ar)
+    end
+
+    # Equation (18a)
+    BLAS.axpy!(d[i], r′, p′v)
+
+    # Equation (18b)
+    mul!(Ar′, A, r′)
+    lmul!(-ζ[i], r′)
+    r′ .+= Ar′
+
+    p′v
+end
+
+# ** Residual error estimator for φₖ functions
+
+"""
+    φₖResidualEstimator{T,k}(nmpd, ρ, vscaled, estimate, tol)
+
+An implementation of the residual error estimate of the φₖ functions,
+as presented in
+
+- Kandolf, P., Ostermann, A., & Rainer, S. (2014). A residual based
+  error estimate for Leja interpolation of matrix functions. Linear
+  Algebra and its Applications, 456(nil), 157–173. [DOI:
+  10.1016/j.laa.2014.04.023](http://dx.doi.org/10.1016/j.laa.2014.04.023)
+
+`nmpd` is a [`NewtonMatrixPolynomialDerivative`](@ref) that
+successively computes the time-derivative of the
+[`NewtonMatrixPolynomial`](@ref) used to interpolate ``\\varphi_k(tA)``
+(the time-step ``t`` is subsequently set to unity), `ρ` is the
+residual vector, `vscaled` an auxiliary vector for `k>0`, and
+`estimate` and `tol` are the estimated error and tolerance,
+respectively.
+"""
+mutable struct φₖResidualEstimator{T,k,NMPD<:NewtonMatrixPolynomialDerivative{T},Vec,R}
+    nmpd::NMPD
+    "Residual vector"
+    ρ::Vec
+    "``v/(k-1)!`` cache"
+    vscaled::Vec
+
+    estimate::R
+    tol::R
+end
+
+φₖResidualEstimator(k, nmpd::NMPD, ρ::Vec, vscaled::Vec, estimate::R, tol::R) where {T,NMPD<:NewtonMatrixPolynomialDerivative{T},Vec,R} =
+    φₖResidualEstimator{T,k,NMPD,Vec,R}(nmpd, ρ, vscaled, estimate, tol)
+
+function φₖResidualEstimator(k::Integer, np::NewtonPolynomial{T}, n::Integer, tol::R) where {T,R<:AbstractFloat}
+    nmpd = NewtonMatrixPolynomialDerivative(np, n)
+    ρ = Vector{T}(undef, n)
+    vscaled = Vector{T}(undef, k > 0 ? n : 0)
+    φₖResidualEstimator(k, nmpd, ρ, vscaled, convert(R, Inf), tol)
+end
+
+function estimate_converged!(error::φₖResidualEstimator{T,k}, A, pv, v, Ar, m) where {T,k}
+    @unpack ρ, vscaled = error
+    if k > 0 && m == 1
+        vscaled .= v/Γ(k)
+    end
+
+    mul!(ρ, A, pv)
+    ρ .-= step!(error.nmpd, A, Ar, m)
+
+    # # TODO: Figure out why this does not work as intended.
+    # if k > 0
+    #     ρ .+= vscaled
+    #     ρ .-= k*pv
+    #     @. ρ += vscaled - k*pv
+    # end
+
+    error.estimate = norm(ρ)
+
+    if k > 0
+        error.estimate /= k
+    end
+
+    error.estimate < error.tol
+end
+
+error_estimator(::typeof(exp), args...) = φₖResidualEstimator(0, args...)
+error_estimator(::typeof(φ₁), args...) = φₖResidualEstimator(1, args...)
+error_estimator(fix::Base.Fix1{typeof(φ),<:Integer}, args...) = φₖResidualEstimator(fix.x, args...)
+
+export error_estimator
