@@ -14,7 +14,14 @@ end
 Base.:(*)(n::Number, l::Line) = Line(n*l.a, n*l.b)
 Base.iszero(l::Line) = iszero(l.a) && iszero(l.b)
 
-Base.range(l::Line, n) = range(l.a,stop=l.b,length=n)
+function Base.range(l::Line, n)
+    a,b = if isreal(l.a) && isreal(l.b)
+        real(l.a), real(l.b)
+    else
+        l.a, l.b
+    end
+    range(a,stop=b,length=n)
+end
 
 function LinearAlgebra.normalize(z::Number)
     N = norm(z)
