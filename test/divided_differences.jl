@@ -16,9 +16,9 @@
                 f_exact = f.(x)
                 taylor_expansion = vcat(1.0 ./ [Γ(k+n+1) for n = 0:m-1])
                 @testset "$method" for (method, func) in [
-                    ("Taylor series", (k,ξ) -> φₖ_ts_div_diff(k, ξ, 1, 0, 1)),
-                    ("Basis change", (k,ξ) -> φₖ_div_diff(k, ξ)),
-                    ("Auto", (k,ξ) -> ⏃(f, ξ, 1, 0, 1))
+                    ("Taylor series", (k,ξ) -> ts_div_diff_table(f, collect(ξ), 1, 0, 1)),
+                    ("Basis change", (k,ξ) -> φₖ_div_diff_basis_change(k, ξ)),
+                    ("Auto", (k,ξ) -> ⏃(f, collect(ξ), 1, 0, 1))
                 ]
                     d = func(k, ξ)
                     @test d ≈ taylor_expansion atol=1e-15
@@ -46,9 +46,9 @@
                 f = φ(k)
                 f_exact = f.(x)
                 @testset "$method" for (method, func) in [
-                    ("Taylor series", (k,ξ) -> φₖ_ts_div_diff(k, ξ, 1, 0, 1)),
-                    ("Basis change", (k,ξ) -> φₖ_div_diff(k, ξ)),
-                    ("Auto", (k,ξ) -> ⏃(f, ξ, 1, 0, 1))
+                    ("Taylor series", (k,ξ) -> ts_div_diff_table(f, collect(ξ), 1, 0, 1)),
+                    ("Basis change", (k,ξ) -> φₖ_div_diff_basis_change(k, ξ)),
+                    ("Auto", (k,ξ) -> ⏃(f, collect(ξ), 1, 0, 1))
                 ]
                     d = func(k, ξ)
                     f_d = NewtonPolynomial(ξ, d).(x)

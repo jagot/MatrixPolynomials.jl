@@ -61,13 +61,14 @@ end
         @testset "Quadratic function" begin
             ξ = points(Leja(x, 10))
             f = x -> x^2
-            np = NewtonPolynomial(f, ξ)
+            d = std_div_diff(f, ξ, 1, 0, 1)
+            np = NewtonPolynomial(ξ, d)
             @test np.d[1:3] ≈ [4,0,1]
             @test all(d -> isapprox(d, 0, atol=√(eps(d))), np.d[4:end])
         end
         @testset "Exponential function" begin
             Δy,errors,error_estimates = test_scalar_newton_leja(exp, x, 20, x, identity, exp)
-            @test Δy < 5e-14
+            @test Δy < 7e-14
             @test all(errors[end-2:end] .< 1e-13)
         end
         @testset "Inhomogeneous ODE, $kind" for (kind,m,tol) in [(:real,43,1e-13), (:complex,60,5e-13)]
@@ -126,6 +127,7 @@ end
             H̃ = t -> exp(t*Matrix(B))*(Y₀ + B\G) - B\G
 
             Δy,errors = test_mat_newton_leja(φ₁, range(λ, n_discr), m, t, H!, H̃)
+            @test errors[end] < 5e-12
         end
     end
 end

@@ -33,8 +33,7 @@ employing `BigFloat`s, but that will only postpone the breakdown,
 albeit with ~40 orders of magnitude, which might be enough for
 practical purposes (but much slower).
 
-For specific choices of ``f``, efficient and accurate algorithms can
-be devised. [`MatrixPolynomials.φₖ_ts_div_diff`](@ref) is based upon
+[`MatrixPolynomials.ts_div_diff_table`](@ref) is based upon
 the fact the divided differences in a third way can be computed as
 ([McCurdy 1984](#Bibliography-1), [Opitz 1964](#Bibliography-1))
 ```math
@@ -112,18 +111,147 @@ precision, along with a Taylor expansion of
 ![Illustration of divided differences accuracy](figures/div_differences_cancellation.svg)
 
 It can clearly be seen that the Taylor expansion is not susceptible to
-the catastrophic cancellation; it is however, not valid outside the
-interval ``[-1.59,1.59]``, so the domain of interest has to be
-rescaled prior to its usage.
+the catastrophic cancellation.
+
+Thanks to the general implementation of divided differences using
+Taylor expansions of the desired function, it is very easy to generate
+[Newton polynomials](@ref) approximating the function on an interval:
+
+```julia-repl
+julia> import MatrixPolynomials: Leja, points, NewtonPolynomial, ⏃
+
+julia> μ = 10.0 # Extent of interval
+10.0
+
+julia> m = 40 # Number of Leja points
+40
+
+julia> ζ = points(Leja(μ*range(-1,stop=1,length=1000),m))
+40-element Array{Float64,1}:
+  10.0
+ -10.0
+  -0.01001001001001001
+   5.7757757757757755
+  -6.596596596596597
+   8.398398398398399
+  -8.6986986986987
+  -3.053053053053053
+   3.2132132132132134
+   9.43943943943944
+  -9.51951951951952
+  -4.794794794794795
+   7.137137137137137
+   1.5515515515515514
+  -7.757757757757758
+   9.7997997997998
+  -1.6116116116116117
+  -9.83983983983984
+   4.614614614614615
+   8.91891891891892
+  -5.7157157157157155
+   2.3723723723723724
+  -9.11911911911912
+   7.757757757757758
+  -3.873873873873874
+   6.416416416416417
+  -8.218218218218219
+   9.91991991991992
+  -0.8108108108108109
+  -9.93993993993994
+   3.973973973973974
+  -7.137137137137137
+   9.1991991991992
+  -2.3523523523523524
+   0.8108108108108109
+  -9.67967967967968
+   9.63963963963964
+   5.235235235235235
+  -5.275275275275275
+   8.078078078078079
+
+julia> d = ⏃(sin, ζ, 1, 0, 1)
+40-element Array{Float64,1}:
+ -0.5440211108893093
+ -0.05440211108893093
+  0.00010554419095304635
+  0.00042707706157334835
+  0.00017816519362596795
+ -0.00015774261733182256
+ -3.046393737965622e-6
+ -1.7726427136510242e-6
+ -1.2091185654301347e-7
+  8.298167162094031e-8
+  1.623156704750302e-9
+ -2.1182984780033414e-9
+  3.072198477098241e-11
+  2.690974958064657e-11
+  7.708729505182354e-13
+ -1.385345395017015e-13
+  2.081712029555509e-15
+  6.103669805230243e-16
+  4.2232933731665444e-18
+ -2.098152059762693e-18
+  7.153277579328475e-21
+  6.390881616124369e-21
+  7.322223484376659e-23
+ -1.3419887223602703e-23
+ -4.050939196813086e-26
+  2.4794777140850798e-26
+  1.268544482329477e-28
+ -3.581342740292682e-29
+  2.7876085130074983e-31
+  4.786776652095869e-32
+  8.943705105911237e-36
+ -5.432439158165548e-35
+  9.88206793819289e-38
+  5.559232062626121e-38
+ -1.2016071877913981e-41
+ -4.710497689585078e-41
+  7.660823607389171e-45
+  3.728816926131357e-44
+ -4.378275580359998e-48
+ -2.577149389756008e-47
+
+julia> np = NewtonPolynomial(ζ, d);
+```
+Behind the scenes, [`MatrixPolynomials.taylor_series`](@ref) is used to
+generate the Taylor expansion of ``\sin(x)``, and when an
+approximation of ``\sin(\tau \mat{Z})``, the full divided difference ``\sin(\mat{Z})``
+table is recovered using [`MatrixPolynomials.propagate_div_diff`](@ref).
+
+![Reconstruction of sine using divided differences](figures/div_differences_sine.svg)
+
+## Reference
 
 ```@docs
 MatrixPolynomials.⏃
 MatrixPolynomials.std_div_diff
-MatrixPolynomials.φₖ_ts_div_diff
-MatrixPolynomials.φₖ_div_diff
-MatrixPolynomials.div_diff_table
+MatrixPolynomials.ts_div_diff_table
+MatrixPolynomials.φₖ_div_diff_basis_change
+MatrixPolynomials.div_diff_table_basis_change
 MatrixPolynomials.min_degree
+```
+
+### Taylor series
+
+```@docs
+MatrixPolynomials.TaylorSeries
 MatrixPolynomials.taylor_series
+MatrixPolynomials.closure
+```
+
+### Scaling
+
+For the computation of ``\exp(A)``, a common approach when ``|A|`` is
+large is to compute ``[\exp(A/s)]^s`` instead. This is known as
+_scaling and squaring_, if ``s`` is selected to be a
+power-of-two. Similar relationships can be found for other functions
+and are implemented for some using
+[`MatrixPolynomials.propagate_div_diff`](@ref).
+
+```@docs
+MatrixPolynomials.propagate_div_diff
+MatrixPolynomials.propagate_div_diff_sin_cos
 ```
 
 ## Bibliography
@@ -133,6 +261,10 @@ MatrixPolynomials.taylor_series
   80(2), 189–201. [DOI:
   10.1007/s00607-007-0227-1](http://dx.doi.org/10.1007/s00607-007-0227-1)
 
+- Kandolf, P., Ostermann, A., & Rainer, S. (2014). A residual based
+  error estimate for leja interpolation of matrix functions. Linear
+  Algebra and its Applications, 456(nil), 157–173. [DOI:
+  10.1016/j.laa.2014.04.023](http://dx.doi.org/10.1016/j.laa.2014.04.023)
 
 - McCurdy, A. C., Ng, K. C., & Parlett, B. N. (1984). Accurate
   computation of divided differences of the exponential

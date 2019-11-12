@@ -5,7 +5,7 @@ using LinearAlgebra
 import MatrixPolynomials: Line, Rectangle, spectral_range,
     Leja, leja!, FastLeja, fast_leja!, points,
     φ₁, φ, Γ,
-    φₖ_ts_div_diff, φₖ_div_diff, ⏃,
+    std_div_diff, ts_div_diff_table, φₖ_div_diff_basis_change, ⏃,
     NewtonPolynomial, NewtonMatrixPolynomial
 
 include("spectral.jl")

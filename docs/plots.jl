@@ -2,7 +2,8 @@ using PyPlot
 using Jagot.plotting
 plot_style("ggplot")
 
-import MatrixPolynomials: φ₁, φ, std_div_diff, ⏃
+import MatrixPolynomials: φ₁, φ, std_div_diff, ⏃,
+    Leja, points, NewtonPolynomial
 using SpecialFunctions
 
 function φ₁_accuracy()
@@ -61,7 +62,7 @@ end
 
 function div_differences_cancellation()
     x = range(-2, stop=2, length=100)
-    ξ = x
+    ξ = collect(x)
     f = exp
     d_std = @time std_div_diff(f, ξ, 1, 0, 1)
     d_std_big = @time std_div_diff(f, big.(ξ), 1, 0, 1)
@@ -70,13 +71,41 @@ function div_differences_cancellation()
     cfigure("div differences cancellation") do
         loglog(d_std, label="Recursive")
         loglog(Float64.(d_std_big), label="Recursive, BigFloat")
-        loglog(d_auto, "--", label="Taylor series")
+        loglog(d_auto, "--", color="black", label="Taylor series")
         xlabel(L"j")
         ylabel(L"\Delta\!\!\!|\,(\zeta_{1:j})\exp")
     end
     legend(framealpha=0.75)
 
     savefig("docs/src/figures/div_differences_cancellation.svg")
+end
+
+function div_differences_sine()
+    μ = 10.0 # Extent of interval
+    m = 40 # Number of Leja points
+    ζ = points(Leja(μ*range(-1,stop=1,length=1000),m))
+    d = ⏃(sin, ζ, 1, 0, 1)
+    np = NewtonPolynomial(sin, ζ)
+
+    x = range(-μ, stop=μ, length=1000)
+    f_np = np.(x)
+    f_exact = sin.(x)
+
+    cfigure("div differences sine") do
+        csubplot(211, nox=true) do
+            plot(x, f_np, "-", label=L"$\sin(x)$ approximation")
+            plot(x, f_exact, "--", label=L"\sin(x)")
+            legend()
+        end
+        csubplot(212) do
+            semilogy(x, abs.(f_np - f_exact), label="Absolute error")
+            semilogy(x, abs.(f_np - f_exact)./abs.(f_exact), label="Relative error")
+            xlabel(L"x")
+            legend()
+        end
+    end
+
+    savefig("docs/src/figures/div_differences_sine.svg")
 end
 
 macro echo(expr)
@@ -89,3 +118,4 @@ mkpath("docs/src/figures")
 @echo φ₁_accuracy()
 @echo φₖ_accuracy()
 @echo div_differences_cancellation()
+@echo div_differences_sine()

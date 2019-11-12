@@ -1,72 +1,66 @@
 """
-    std_div_diff(f, ξ, h, c, γ)
+    std_div_diff(f, ζ, h, c, γ)
 
-Compute the divided differences of `f` at `h*(c .+ γ*ξ)`, where `ξ` is
+Compute the divided differences of `f` at `h*(c .+ γ*ζ)`, where `ζ` is
 a vector of (possibly complex) interpolation points, using the
 standard recursion formula.
 """
-function std_div_diff(f, ξ::AbstractVector{T}, h, c, γ) where T
-    m = length(ξ)
+function std_div_diff(f, ζ::AbstractVector{T}, h, c, γ) where T
+    m = length(ζ)
     d = Vector{T}(undef, m)
     for i = 1:m
-        d[i] = f(h*(c + γ*ξ[i]))
+        d[i] = f(h*(c + γ*ζ[i]))
         for j = 2:i
-            d[i] = (d[i]-d[j-1])/(ξ[i]-ξ[j-1])
+            d[i] = (d[i]-d[j-1])/(ζ[i]-ζ[j-1])
         end
     end
     d
 end
 
 """
-    ⏃(f, ξ, args...)
+    ts_div_diff_table(f, ζ, h, c, γ; kwargs...)
 
-Compute the divided differences of `f` at `ξ`, using a method that is
-optimized for the function `f`, if one is available, otherwise
-fallback to [`MatrixPolynomials.std_div_diff`](@ref).
+Compute the divided differences of `f` at `h*(c .+ γ*ζ)`, where `ζ` is
+a vector of (possibly complex) interpolation points, by forming the
+full divided differences table using the Taylor series of `f(H)`
+(computed using [`taylor_series`](@ref)). If there is a scaling
+relationship available for `f`, the Taylor series of `f(τ*H)` is
+computed instead, and the full solution is recovered using
+[`propagate_div_diff`](@ref).
 """
-⏃(args...) = std_div_diff(args...)
+function ts_div_diff_table(f, ζ::AbstractVector{T}, h, c, γ; kwargs...) where T
+    ts = taylor_series(f)
 
-# * Special cases for φₖ(z)
+    m = length(ζ)
 
-"""
-    φₖ_ts_div_diff(k, ξ, h, c, γ[, τ=1])
+    Ζ = Bidiagonal(ζ, ones(T, m-1), :L)
+    H = h*(c*I + γ*Ζ)
 
-Compute the divided differences of `φₖ` at `τ*h*(c .+ γ*ξ)`, where `ξ`
-is a vector of (possibly complex) interpolation points, using the
-algorithm in Table 2 of
+    # Scale the step taken, if there is a functional relationship for
+    # f which permits this.
+    xmax = maximum(ζᵢ -> abs(h*(c + γ*ζᵢ)), ζ)
+    J = num_steps(f, xmax)
+    τ = one(T)/J
 
-- Caliari, M. (2007). Accurate evaluation of divided differences for
-  polynomial interpolation of exponential propagators. Computing,
-  80(2), 189–201. [DOI: 10.1007/s00607-007-0227-1](http://dx.doi.org/10.1007/s00607-007-0227-1)
-"""
-function φₖ_ts_div_diff(k, ξ::AbstractVector{T}, h, c, γ, τ=one(T)) where T
-    τxmax = maximum(ξᵢ -> abs(τ*h*(c + γ*ξᵢ)), ξ)
-    τxmax > 1.59 && @warn("Taylor series only valid for |τ*max(x)| < 1.59, got $(τxmax)")
-    m = length(ξ)
-    F = Matrix{T}(undef, m, m)
-    for i = 1:m
-        for j = 1:i
-            F[i,j] = F[j,i] = (τ*h*γ)^i/Γ(i+k-j+1)
-        end
+    fH = ts(τ*H; kwargs...)
+
+    if J > 1
+        propagate_div_diff(f, fH, J, H, τ)
+    else
+        fH[:,1]
     end
-    for l = 2:17
-        for j = 1:m-1
-            F[j,j] *= τ*h*(c + γ*ξ[j])/(l+k-1)
-            for i = j+1:m
-                F[j,i] = τ*h*((c + γ*ξ[i])*F[j,i] + γ*F[j,i-1])/(l + i - j + k - 1)
-                F[i,j] += F[j,i]
-            end
-        end
-    end
-    for j = 1:m
-        F[j,j] = φ(k,τ*h*(c + γ*ξ[j]))
-    end
-    F[:,1]
 end
 
-⏃(::typeof(exp), args...) = φₖ_ts_div_diff(0, args...)
-⏃(::typeof(φ₁), args...) = φₖ_ts_div_diff(1, args...)
-⏃(fix::Base.Fix1{typeof(φ),<:Integer}, args...) = φₖ_ts_div_diff(fix.x, args...)
+"""
+    ⏃(f, ζ, args...)
+
+Compute the divided differences of `f` at `ζ`, using a method that is
+optimized for the function `f`, if one is available, otherwise
+fallback to [`MatrixPolynomials.ts_div_diff_table`](@ref).
+"""
+⏃(args...) = ts_div_diff_table(args...)
+
+# * Special cases for φₖ(z)
 
 # These are linear fits that are always above the values of Table 3.1 of
 #
@@ -100,7 +94,7 @@ function taylor_series(::Type{T}, ::typeof(exp), n; s=1, θ=3.5) where T
 end
 
 """
-    div_diff_table(f, ζ[; kwargs...])
+    div_diff_table_basis_change(f, ζ[; kwargs...])
 
 Construct the table of divided differences of `f` at the interpolation
 points `ζ`, based on the algorithm on page 26 of
@@ -110,7 +104,7 @@ points `ζ`, based on the algorithm on page 26 of
   exponential function. Dolomites Research Notes on Approximation,
   12(1), 28–42.
 """
-function div_diff_table(f, ζ::AbstractVector{T}; s=1, kwargs...) where T
+function div_diff_table_basis_change(f, ζ::AbstractVector{T}; s=1, kwargs...) where T
     n = length(ζ)-1
     ts = taylor_series(T, f, n+1; s=s, kwargs...)
     N = length(ts)-1
@@ -135,16 +129,16 @@ function div_diff_table(f, ζ::AbstractVector{T}; s=1, kwargs...) where T
 end
 
 """
-    φₖ_div_diff(k, ξ[; θ=3.5, s=1])
+    φₖ_div_diff_basis_change(k, ζ[; θ=3.5, s=1])
 
-Specialized interface to [`div_diff_table`](@ref) for the `φₖ`
+Specialized interface to [`div_diff_table_basis_change`](@ref) for the `φₖ`
 functions. `θ` is the desired radius of convergence of the Taylor
 series of `φₖ`, and `s` is the scaling-and-squaring parameter, which
 if set to zero, will be calculated to fulfill `θ`.
 """
-function φₖ_div_diff(k, ξ::AbstractVector{T}; θ=real(T(3.5)), s=1) where T
-    μ = mean(ξ)
-    z = vcat(zeros(k), ξ) .- μ
+function φₖ_div_diff_basis_change(k, ζ::AbstractVector{T}; θ=real(T(3.5)), s=1) where T
+    μ = mean(ζ)
+    z = vcat(zeros(k), ζ) .- μ
     n = length(z) - 1
 
     # Scaling
@@ -154,7 +148,7 @@ function φₖ_div_diff(k, ξ::AbstractVector{T}; θ=real(T(3.5)), s=1) where T
     end
 
     # The Taylor series of φₖ is just a shifted version of exp.
-    F = div_diff_table(exp, z; s=s, θ=θ)
+    F = div_diff_table_basis_change(exp, z; s=s, θ=θ)
 
     dd = F[1,:]
 
