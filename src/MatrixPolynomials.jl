@@ -23,4 +23,6 @@ include("propagate_divided_differences.jl")
 include("divided_differences.jl")
 include("newton.jl")
 
+include("funcv.jl")
+
 end # module
