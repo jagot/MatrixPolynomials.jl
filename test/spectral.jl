@@ -6,6 +6,7 @@
         @test range(l, 11) == range(0.1, stop=1.0, length=11)
         @test range(im*l, 11) == range(0.1im, stop=1.0im, length=11)
 
+        @test l ∪ l == l
         @test l ∪ Line(0.0, 0.9) == Line(0.0, 1.0)
         @test l ∪ Line(0.0, 0.0) == Line(0.0, 1.0)
         @test Line(0.5(1+im),1+im) ∪ Line(0.0, 0.0) == Line(0.0, 1+im)
