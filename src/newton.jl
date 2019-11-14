@@ -31,21 +31,28 @@ NewtonPolynomial(f::Function, ζ::AbstractVector) =
 Base.view(np::NewtonPolynomial, args...) =
     NewtonPolynomial(view(np.ζ, args...), view(np.d, args...))
 
-function (np::NewtonPolynomial{T})(z::Number; errors=nothing) where T
-    update_error = zero(T)
+"""
+    (np::NewtonPolynomial)(z[, error=false])
+
+Evaluate the Newton polynomial `np` at `z`. If `error` is set to
+`true`, a second return value will contain an estimate of the error in
+the polynomial approximation.
+"""
+function (np::NewtonPolynomial{T})(z::Number, error) where T
+    update_error = zero(real(T))
     p = np.d[1]
     r = z - np.ζ[1]
     m = length(np.ζ)
     for i = 2:m
         p += np.d[i]*r
-        update_error = abs(np.d[i])*norm(r)
+        error && (update_error = abs(np.d[i])*norm(r))
         r *= z - np.ζ[i]
     end
-    if errors isa AbstractVector && length(errors) ≥ 1
-        errors[1] = update_error
-    end
-    p
+
+    p,update_error
 end
+
+(np::NewtonPolynomial)(z) = first(np(z,false))
 
 function Base.show(io::IO, np::NewtonPolynomial)
     degree = length(np.ζ)-1

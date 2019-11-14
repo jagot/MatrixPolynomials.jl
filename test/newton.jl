@@ -2,7 +2,7 @@ function test_scalar_newton_leja(f, x, m, x̃, h, h̃)
     ξ = points(Leja(x, m))
     @info "$m $(eltype(ξ)) Leja points"
     np = NewtonPolynomial(f, ξ)
-    y = h(np).(x̃)
+    y = h.(x̃,Ref(np))
     ỹ = h̃.(x̃)
 
     ms = 1:m
@@ -10,11 +10,14 @@ function test_scalar_newton_leja(f, x, m, x̃, h, h̃)
     error_estimates = zeros(m,1)
     for m = ms
         np′ = view(np, 1:m)
+        p = x -> begin
+            val,err = np′(x, true)
+            error_estimates[m,1] = max(error_estimates[m,1], err)
+            val
+        end
         y′ = similar(y)
         for i = eachindex(x̃)
-            em = zeros(1)
-            y′[i] = h(np′)(x̃[i]; errors=em)
-            error_estimates[m,1] = max(error_estimates[m,1], em[1])
+            y′[i] = h(x̃[i],p)
         end
         errors[m] = norm(y′ - h̃.(x̃))
     end
@@ -67,7 +70,7 @@ end
             @test all(d -> isapprox(d, 0, atol=√(eps(d))), np.d[4:end])
         end
         @testset "Exponential function" begin
-            Δy,errors,error_estimates = test_scalar_newton_leja(exp, x, 20, x, identity, exp)
+            Δy,errors,error_estimates = test_scalar_newton_leja(exp, x, 20, x, (t, p) -> p(t), exp)
             @test Δy < 7e-14
             @test all(errors[end-2:end] .< 1e-13)
         end
@@ -84,9 +87,7 @@ end
 
             t = range(tmin, stop=tmax, length=1000)
 
-            h = function(p)
-                (t;kwargs...) -> y₀ + t*p(t*b;kwargs...)*(b*y₀ + g)
-            end
+            h = (t, p) -> y₀ + t*p(t*b)*(b*y₀ + g)
             h̃ = t -> exp(t*b)*(y₀ + g/b) - g/b
 
             Δy,errors,error_estimates = test_scalar_newton_leja(φ₁, b*t, m, t, h, h̃)
