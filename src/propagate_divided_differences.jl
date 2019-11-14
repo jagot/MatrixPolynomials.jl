@@ -62,7 +62,7 @@ end
     propagate_div_diff_sin_cos(sinH, cosH, J)
 
 Find the divided differences tables of `sin` and `cos` simultaneously,
-by utilizing the double-angle formulas
+by utilizing the double-angle formulæ
 ```math
 \sin2\theta = 2\sin\theta\cos\theta, \quad
 \cos2\theta = 1 - \sin^2\theta,

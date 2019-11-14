@@ -47,6 +47,21 @@ function (np::NewtonPolynomial{T})(z::Number; errors=nothing) where T
     p
 end
 
+function Base.show(io::IO, np::NewtonPolynomial)
+    degree = length(np.ζ)-1
+    ar,br = extrema(real(np.ζ))
+    ai,bi = extrema(imag(np.ζ))
+    compl_str(r,i) = if iszero(i)
+        r
+    elseif iszero(r) && iszero(i)
+        0
+    else
+        r + im*i
+    end
+
+    write(io, "Newton polynomial of degree $(degree) on $(compl_str(ar,ai))..$(compl_str(br,bi))")
+end
+
 # * Newton matrix polynomial
 
 """
@@ -79,9 +94,9 @@ end
 estimate_converged!(::Nothing, args...) = false
 
 """
-    mul!(w, nmp::NewtonMatrixPolynomial, A, v)
+    mul!(w, p::NewtonMatrixPolynomial, A, v)
 
-Compute the action of the [`NewtonMatrixPolynomial`](@ref) `nmp`
+Compute the action of the [`NewtonMatrixPolynomial`](@ref) `p`
 evaluated for the matrix (or linear operator) `A` acting on `v` and
 storing the result in `w`, i.e. `w ← p(A)*v`.
 """

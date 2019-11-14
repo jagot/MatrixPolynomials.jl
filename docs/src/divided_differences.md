@@ -212,12 +212,21 @@ julia> d = ⏃(sin, ζ, 1, 0, 1)
  -4.378275580359998e-48
  -2.577149389756008e-47
 
-julia> np = NewtonPolynomial(ζ, d);
+julia> np = NewtonPolynomial(ζ, d)
+Newton polynomial of degree 39 on -10.0..10.0
+
+julia> x = range(-μ, stop=μ, length=1000)
+-10.0:0.02002002002002002:10.0
+
+julia> f_np = np.(x);
+
+julia> f_exact = sin.(x);
 ```
-Behind the scenes, [`MatrixPolynomials.taylor_series`](@ref) is used to
-generate the Taylor expansion of ``\sin(x)``, and when an
-approximation of ``\sin(\tau \mat{Z})``, the full divided difference ``\sin(\mat{Z})``
-table is recovered using [`MatrixPolynomials.propagate_div_diff`](@ref).
+Behind the scenes, [`MatrixPolynomials.taylor_series`](@ref) is used
+to generate the Taylor expansion of ``\sin(x)``, and when an
+approximation of ``\sin(\tau \mat{Z})`` has been computed, the full
+divided difference table ``\sin(\mat{Z})`` is recovered using
+[`MatrixPolynomials.propagate_div_diff`](@ref).
 
 ![Reconstruction of sine using divided differences](figures/div_differences_sine.svg)
 
