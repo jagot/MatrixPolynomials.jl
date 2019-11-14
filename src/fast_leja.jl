@@ -1,8 +1,19 @@
-# This is a Julia port of the Matlab algorithm published in
-#
-# - Baglama, J., Calvetti, D., & Reichel, L. (1998). Fast Leja
-#   points. Electron. Trans. Numer. Anal, 7(124-140), 119–120.
+"""
+    Leja(ζ, ∏ζ, ζs, ia, ib)
 
+Generate the approximate Leja points `ζ` along a line; `∏ζ[i]` is the
+product of the distances of `ζ[i]`, and `ζs` are candidate points.
+
+The quality of the fast Leja points for large amounts is not dependent
+on a preexisting discretization of a set, as is the case for
+[`Leja`](@ref), however fast Leja points are restricted to lying on a
+line in the complex plane instead.
+
+This is a Julia port of the Matlab algorithm published in
+
+- Baglama, J., Calvetti, D., & Reichel, L. (1998). Fast Leja
+  points. Electron. Trans. Numer. Anal, 7(124-140), 119–120.
+"""
 struct FastLeja{T}
     ζ::Vector{T}
     ∏ζ::Vector{T}
@@ -13,6 +24,12 @@ end
 
 meanζ(ζ) = (i,j) -> (ζ[i]+ζ[j])/2
 
+"""
+    fast_leja!(fl::FastLeja, n)
+
+Generate `n` fast Leja points, can be used add more fast Leja points
+to an already formed sequence.
+"""
 function fast_leja!(fl::FastLeja, n)
     @unpack ζ, ∏ζ, ζs, ia, ib = fl
     mζ = meanζ(ζ)
@@ -46,6 +63,11 @@ function fast_leja!(fl::FastLeja, n)
     fl
 end
 
+"""
+    FastLeja(a, b, n)
+
+Generate the `n` first approximate Leja points along the line `a–b`.
+"""
 function FastLeja(a, b, n)
     T = float(promote_type(typeof(a),typeof(b)))
     ζ = zeros(T, 3)
@@ -74,4 +96,9 @@ function FastLeja(a, b, n)
     fast_leja!(fl, n)
 end
 
+"""
+    points(fl::FastLeja)
+
+Return the fast Leja points generated so far.
+"""
 points(fl::FastLeja) = fl.ζ

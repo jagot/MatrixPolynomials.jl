@@ -143,6 +143,17 @@ end
 
 # ** Newton matrix polynomial derivative
 
+"""
+    NewtonMatrixPolynomialDerivative(np, p′v, r′, Ar′)
+
+This strucyture aids in the computation of the first derivative of the
+[`NewtonPolynomial`](@ref) `np`. It is to be used in lock-step with
+the evaluation of the polynomial, i.e. when evaluating the ``m``th
+degree of `np`, this structure will provide the first derivative of
+the ``m``th degree polynomial, storing the result in `p′v`. `r′` and
+`Ar′` are recurrence vectors. Its main application is in
+[`φₖResidualEstimator`](@ref).
+"""
 struct NewtonMatrixPolynomialDerivative{T,NP<:NewtonPolynomial{T},Vec}
     np::NP
     "Action of the time-derivative of the Newton polynomial `np` on a vector `v`"

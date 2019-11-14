@@ -1,7 +1,18 @@
+"""
+    Shape
+
+Abstract base type for different shapes in the complex plane
+encircling the spectra of linear operators.
+"""
 abstract type Shape{T} end
 
 # * Line
 
+"""
+    Line(a, b)
+
+For spectra falling on a line in the complex plane from `a` to `b`.
+"""
 struct Line{T} <: Shape{T}
     a::Complex{T}
     b::Complex{T}
@@ -55,6 +66,12 @@ end
 
 # * Rectangle
 
+"""
+    Rectangle(a,b)
+
+For spectra falling within a rectangle in the complex plane with
+corners `a` and `b`.
+"""
 struct Rectangle{T} <: Shape{T}
     a::Complex{T}
     b::Complex{T}

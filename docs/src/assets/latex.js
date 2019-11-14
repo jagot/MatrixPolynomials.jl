@@ -23,7 +23,9 @@ require(['mathjax'], function(MathJax) {
                 diff : ["\\mathrm{d}#1\\,",1],
                 Beta : "\\mathrm{B}", // You've gotta be kidding
                 divdiff : "⏃",
-                bmat: ["\\begin{bmatrix}#1\\end{bmatrix}",1]
+                bmat: ["\\begin{bmatrix}#1\\end{bmatrix}",1],
+                Real: "\\mathbb{R}",
+                Complex: "\\mathbb{C}"
             }
         }
     });

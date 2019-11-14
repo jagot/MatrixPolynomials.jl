@@ -3,8 +3,34 @@ using Jagot.plotting
 plot_style("ggplot")
 
 import MatrixPolynomials: φ₁, φ, std_div_diff, ⏃,
-    Leja, points, NewtonPolynomial
+    Leja, FastLeja, points, NewtonPolynomial
 using SpecialFunctions
+
+function leja()
+    m = 10
+    a,b = -2,2
+    l = Leja(range(a, stop=b, length=1000), m)
+    fl = FastLeja(a, b, m)
+    ζ = points(l)
+    fζ = points(fl)
+
+    cfigure("leja") do
+        csubplot(211,nox=true) do
+            plot(1:m, ζ, ".-", label="Leja points")
+            plot(1:m, fζ, ".--", label="Fast Leja points")
+            ylabel(L"\zeta_m")
+            legend()
+        end
+        csubplot(212) do
+            plot(1:m, abs.(l.∏ζ).^(1 ./ (1:m)), ".-", label="Leja points")
+            plot(1:m, abs.(fl.∏ζ).^(1 ./ (1:m)), ".--", label="Fast Leja points")
+            xlabel(L"m")
+            ylabel(L"C(\{\zeta_{1:m}\})")
+        end
+    end
+
+    savefig("docs/src/figures/leja_points.svg")
+end
 
 function φ₁_accuracy()
     φnaïve(x) = (exp(x) - 1)/x
@@ -115,6 +141,7 @@ end
 
 @info "Documentation plots"
 mkpath("docs/src/figures")
+@echo leja()
 @echo φ₁_accuracy()
 @echo φₖ_accuracy()
 @echo div_differences_cancellation()

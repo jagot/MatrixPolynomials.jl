@@ -7,9 +7,11 @@ makedocs(;
     format = Documenter.HTML(assets = ["assets/latex.js"]),
     pages=[
         "Home" => "index.md",
-        "φₖ functions" => "phi_functions.md",
+        "Functions of matrices" => "funcv.md",
+        "Leja points" => "leja.md",
         "Divided differences" => "divided_differences.md",
-        "Newton polynomials" => "newton_polynomials.md"
+        "Newton polynomials" => "newton_polynomials.md",
+        "φₖ functions" => "phi_functions.md",
     ],
     repo="https://github.com/jagot/MatrixPolynomials.jl/blob/{commit}{path}#L{line}",
     sitename="MatrixPolynomials.jl",
