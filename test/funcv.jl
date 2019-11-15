@@ -12,7 +12,7 @@ function test_stepping(f, x, m, μ, x̃, h̃; kwargs...)
     
     @info "Leja/Newton solution"
     @time for i = 2:length(x̃)
-        eval!(view(y,:,i), f̂, view(y,:,i-1))
+        mul!(view(y,:,i), f̂, view(y,:,i-1))
     end
     
     global_error = abs.(y-ỹ)

@@ -3,6 +3,7 @@
 ```@docs
 MatrixPolynomials.FuncV
 MatrixPolynomials.FuncV(f::Function, A, m, t=one(eltype(A)); distribution=:leja, leja_multiplier=100, tol=1e-15, kwargs...)
+LinearAlgebra.mul!(w, funcv::MatrixPolynomials.FuncV, v)
 ```
 
 ## Spectral ranges and shapes

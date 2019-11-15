@@ -75,7 +75,13 @@ unshift!(w, funcv::FuncV) = @assert iszero(funcv.c)
 single_step!(w, funcv::FuncV, v) =
     mul!(w, funcv.p, funcv.s⁻¹Amc, v)
 
-function eval!(w, funcv::FuncV, v)
+"""
+    mul!(w, funcv::FuncV, v)
+
+Evaluate the action of the matrix polynomial `funcv` on `v` and store
+the result in `w`.
+"""
+function LinearAlgebra.mul!(w, funcv::FuncV, v)
     single_step!(w, funcv, v)
     unshift!(w, funcv)
 end
