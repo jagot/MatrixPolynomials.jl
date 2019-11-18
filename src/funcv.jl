@@ -70,6 +70,9 @@ function FuncV(f::Function, A, m, t=one(eltype(A));
     FuncV(f, s⁻¹Amc, p, c, s)
 end
 
+# This does not yet consider substepping
+matvecs(f::FuncV) = matvecs(f.p)
+
 unshift!(w, funcv::FuncV) = @assert iszero(funcv.c)
 
 single_step!(w, funcv::FuncV, v) =

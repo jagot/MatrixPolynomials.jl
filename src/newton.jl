@@ -72,15 +72,16 @@ end
 # * Newton matrix polynomial
 
 """
-    NewtonMatrixPolynomial(np, pv, r, Ar, error)
+    NewtonMatrixPolynomial(np, pv, r, Ar, error, m)
 
 This structure aids in the computation of the action of a matrix
 polynomial on a vector. `np` is the [`NewtonPolynomial`](@ref), `pv`
 is the desired result, `r` and `Ar` are recurrence vectors, and
 `error` is an optional error estimator algorithm that can be used to
-terminate the iterations early.
+terminate the iterations early. `m` records how many matrix–vector
+multiplications were used when evaluating the matrix polynomial.
 """
-struct NewtonMatrixPolynomial{T,NP<:NewtonPolynomial{T},Vec,ErrorEstim}
+mutable struct NewtonMatrixPolynomial{T,NP<:NewtonPolynomial{T},Vec,ErrorEstim}
     np::NP
     "Action of the Newton polynomial `np` on a vector `v`"
     pv::Vec
@@ -89,16 +90,20 @@ struct NewtonMatrixPolynomial{T,NP<:NewtonPolynomial{T},Vec,ErrorEstim}
     "Matrix–Recurrence vector product"
     Ar::Vec
     error::ErrorEstim
+    m::Int
 end
 
 function NewtonMatrixPolynomial(np::NewtonPolynomial{T}, n::Integer, res=nothing) where T
     pv = Vector{T}(undef, n)
     r = Vector{T}(undef, n)
     Ar = Vector{T}(undef, n)
-    NewtonMatrixPolynomial(np, pv, r, Ar, res)
+    NewtonMatrixPolynomial(np, pv, r, Ar, res, 0)
 end
 
+matvecs(nmp::NewtonMatrixPolynomial) = nmp.m + matvecs(nmp.error)
+
 estimate_converged!(::Nothing, args...) = false
+matvecs(::Nothing) = 0
 
 """
     mul!(w, p::NewtonMatrixPolynomial, A, v)
@@ -118,6 +123,8 @@ function LinearAlgebra.mul!(w, nmp::NewtonMatrixPolynomial, A, v)
     @unpack pv,r,Ar = nmp
     @unpack d,ζ = nmp.np
 
+    nmp.m = 0
+
     pv .= d[1]*v # Equation (3c)
     r .= v # r is initialized using the normal iteration, below
     m = length(ζ)
@@ -129,6 +136,7 @@ function LinearAlgebra.mul!(w, nmp::NewtonMatrixPolynomial, A, v)
 
         # Equation (3b)
         mul!(Ar, A, r)
+        nmp.m += 1
         lmul!(-ζ[i-1], r)
         r .+= Ar
 
@@ -144,7 +152,7 @@ end
 # ** Newton matrix polynomial derivative
 
 """
-    NewtonMatrixPolynomialDerivative(np, p′v, r′, Ar′)
+    NewtonMatrixPolynomialDerivative(np, p′v, r′, Ar′, m)
 
 This strucyture aids in the computation of the first derivative of the
 [`NewtonPolynomial`](@ref) `np`. It is to be used in lock-step with
@@ -152,9 +160,10 @@ the evaluation of the polynomial, i.e. when evaluating the ``m``th
 degree of `np`, this structure will provide the first derivative of
 the ``m``th degree polynomial, storing the result in `p′v`. `r′` and
 `Ar′` are recurrence vectors. Its main application is in
-[`φₖResidualEstimator`](@ref).
+[`φₖResidualEstimator`](@ref). `m` records how many matrix–vector
+multiplications were used when evaluating the matrix polynomial.
 """
-struct NewtonMatrixPolynomialDerivative{T,NP<:NewtonPolynomial{T},Vec}
+mutable struct NewtonMatrixPolynomialDerivative{T,NP<:NewtonPolynomial{T},Vec}
     np::NP
     "Action of the time-derivative of the Newton polynomial `np` on a vector `v`"
     p′v::Vec
@@ -162,14 +171,17 @@ struct NewtonMatrixPolynomialDerivative{T,NP<:NewtonPolynomial{T},Vec}
     r′::Vec
     "Matrix–Recurrence vector product"
     Ar′::Vec
+    m::Int
 end
 
 function NewtonMatrixPolynomialDerivative(np::NewtonPolynomial{T}, n::Integer) where T
     p′v = Vector{T}(undef, n)
     r′ = Vector{T}(undef, n)
     Ar′ = Vector{T}(undef, n)
-    NewtonMatrixPolynomialDerivative(np, p′v, r′, Ar′)
+    NewtonMatrixPolynomialDerivative(np, p′v, r′, Ar′, 0)
 end
+
+matvecs(nmpd::NewtonMatrixPolynomialDerivative) = nmpd.m
 
 function step!(nmpd::NewtonMatrixPolynomialDerivative, A, Ar, i)
     @unpack p′v,r′,Ar′ = nmpd
@@ -179,6 +191,7 @@ function step!(nmpd::NewtonMatrixPolynomialDerivative, A, Ar, i)
         # Equation (18c)
         p′v .= false
         copyto!(r′, Ar)
+        nmpd.m = 0
     end
 
     # Equation (18a)
@@ -186,6 +199,7 @@ function step!(nmpd::NewtonMatrixPolynomialDerivative, A, Ar, i)
 
     # Equation (18b)
     mul!(Ar′, A, r′)
+    nmpd.m += 1
     lmul!(-ζ[i], r′)
     r′ .+= Ar′
 
@@ -222,10 +236,12 @@ mutable struct φₖResidualEstimator{T,k,NMPD<:NewtonMatrixPolynomialDerivative
 
     estimate::R
     tol::R
+
+    m::Int
 end
 
 φₖResidualEstimator(k, nmpd::NMPD, ρ::Vec, vscaled::Vec, estimate::R, tol::R) where {T,NMPD<:NewtonMatrixPolynomialDerivative{T},Vec,R} =
-    φₖResidualEstimator{T,k,NMPD,Vec,R}(nmpd, ρ, vscaled, estimate, tol)
+    φₖResidualEstimator{T,k,NMPD,Vec,R}(nmpd, ρ, vscaled, estimate, tol, 0)
 
 function φₖResidualEstimator(k::Integer, np::NewtonPolynomial{T}, n::Integer, tol::R) where {T,R<:AbstractFloat}
     nmpd = NewtonMatrixPolynomialDerivative(np, n)
@@ -234,13 +250,19 @@ function φₖResidualEstimator(k::Integer, np::NewtonPolynomial{T}, n::Integer,
     φₖResidualEstimator(k, nmpd, ρ, vscaled, convert(R, Inf), tol)
 end
 
+matvecs(error::φₖResidualEstimator) = error.m + matvecs(error.nmpd)
+
 function estimate_converged!(error::φₖResidualEstimator{T,k}, A, pv, v, Ar, m) where {T,k}
     @unpack ρ, vscaled = error
-    if k > 0 && m == 1
-        vscaled .= v/Γ(k)
+    if m == 1
+        error.m = 0
+        if k > 0
+            vscaled .= v/Γ(k)
+        end
     end
 
     mul!(ρ, A, pv)
+    error.m += 1
     ρ .-= step!(error.nmpd, A, Ar, m)
 
     # # TODO: Figure out why this does not work as intended.
