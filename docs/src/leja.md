@@ -11,10 +11,9 @@ better approximations, since the roots of the Chebyshev polynomial of
 degree ``m`` are not related to those of the polynomial of degree
 ``m-1``.
 
-The Leja points ([Leja 1957](#Bibliography-1)) ``\{\zeta_i\}`` are
-generated from a set ``E \subset \Complex`` such that the next point
-in the sequence is maximally distant from all previously generated
-points:
+The Leja points [^Leja] ``\{\zeta_i\}`` are generated from a set ``E
+\subset \Complex`` such that the next point in the sequence is
+maximally distant from all previously generated points:
 
 ```math
 \begin{equation}
@@ -29,7 +28,7 @@ w(\zeta)
 with ``w(\zeta)`` being an optional weight function (unity
 hereinafter). Interpolating a function on the Leja points largely
 avoids the overfitting problems and performs similarly to Chebyshev
-interpolation ([Reichel 1990](#Bibliography-1)), while still allowing
+interpolation [^Reichel], while still allowing
 for iteratively improved approximation by the addition of more
 interpolation points.
 
@@ -81,15 +80,15 @@ MatrixPolynomials.points
 
 ## Bibliography
 
-- Leja, F. (1957). Sur certaines suites liées aux ensembles plans et
-  leur application à la représentation conforme. Annales Polonici
-  Mathematici, 4(1), 8–13. [DOI:
-  10.4064/ap-4-1-8-13](http://dx.doi.org/10.4064/ap-4-1-8-13)
+[^Leja]: Leja, F. (1957). Sur certaines suites liées aux ensembles
+    plans et leur application à la représentation conforme. Annales
+    Polonici Mathematici, 4(1), 8–13. [DOI:
+    10.4064/ap-4-1-8-13](http://dx.doi.org/10.4064/ap-4-1-8-13)
 
-- Reichel, L. (1990). Newton Interpolation At Leja Points. BIT, 30(2),
-  332–346. [DOI:
-  10.1007/bf02017352](http://dx.doi.org/10.1007/bf02017352)
+[^Reichel]: Reichel, L. (1990). Newton Interpolation At Leja
+    Points. BIT, 30(2), 332–346. [DOI:
+    10.1007/bf02017352](http://dx.doi.org/10.1007/bf02017352)
 
-- Baglama, J., Calvetti, D., & Reichel, L. (1998). Fast Leja
-  points. Electron. Trans. Numer. Anal, 7(124-140), 119–120. [URL:
-  https://elibm.org/article/10006464](https://elibm.org/article/10006464)
+[^Baglama]: Baglama, J., Calvetti, D., & Reichel, L. (1998). Fast Leja
+    points. Electron. Trans. Numer. Anal, 7(124-140), 119–120. [URL:
+    https://elibm.org/article/10006464](https://elibm.org/article/10006464)

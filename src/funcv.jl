@@ -38,7 +38,7 @@ polynomial approximation of `f` formed using `m` interpolation points.
 `kwargs...` are passed on to [`spectral_range`](@ref) which estimates
 the range over which `f` has to be interpolated.
 """
-function FuncV(f::Function, A, m, t=one(eltype(A));
+function FuncV(f::Function, A, m::Integer, t=one(eltype(A));
                distribution=:leja, leja_multiplier=100,
                tol=1e-15, kwargs...)
     λ = spectral_range(t, A; kwargs...)

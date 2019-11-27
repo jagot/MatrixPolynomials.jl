@@ -4,7 +4,8 @@ isdefined(Main, :NOPLOTS) && NOPLOTS || include("plots.jl")
 
 makedocs(;
     modules=[MatrixPolynomials],
-    format = Documenter.HTML(assets = ["assets/latex.js"]),
+    format = Documenter.HTML(assets = ["assets/latex.js"],
+                             mathengine = Documenter.MathJax()),
     pages=[
         "Home" => "index.md",
         "Functions of matrices" => "funcv.md",

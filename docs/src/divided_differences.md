@@ -1,8 +1,7 @@
 # Divided differences
 
 The divided differences of a function ``f`` with respect to a set of
-interpolation points ``\{\zeta_i\}`` is defined as
-([McCurdy 1984](#Bibliography-1))
+interpolation points ``\{\zeta_i\}`` is defined as [^McCurdy]
 ```math
 \begin{equation}
 \label{eqn:div-diff-def}
@@ -35,7 +34,7 @@ practical purposes (but much slower).
 
 [`MatrixPolynomials.ts_div_diff_table`](@ref) is based upon
 the fact the divided differences in a third way can be computed as
-([McCurdy 1984](#Bibliography-1), [Opitz 1964](#Bibliography-1))
+[^McCurdy][^Opitz]
 ```math
 \begin{equation}
 \label{eqn:div-diff-mat-fun}
@@ -57,7 +56,7 @@ i.e. the first row of the function ``f`` applied to the matrix
 &&&&\zeta_j}.
 \end{equation}
 ```
-The right-eigenvectors are given by ([Opitz 1964](#Bibliography-1))
+The right-eigenvectors are given by [Opitz]
 ```math
 \begin{equation}
 \label{eqn:div-diff-mat-right-eigen}
@@ -98,9 +97,8 @@ is prone to the same kind of catastrophic cancellation as is
 ``\eqref{eqn:div-diff-recursive}``, so to evaluate
 ``\eqref{eqn:div-diff-mat-fun}``, one instead turns to Taylor or
 [Padé](https://en.wikipedia.org/wiki/Pad%C3%A9_approximant) expansions
-of ``f(\mat{Z}_{i:j})`` ([McCurdy 1984](#Bibliography-1), [Caliari
-2004](#Bibliography-1)), or interpolation polynomial basis changes
-([Zivcovich 2019](#Bibliography-1)).
+of ``f(\mat{Z}_{i:j})`` [^McCurdy][^Caliari], or interpolation
+polynomial basis changes [^Zivcovich].
 
 As an illustration, we show the divided differences of `exp` over 100
 points uniformly spread over ``[-2,2]``, calculated using
@@ -265,28 +263,30 @@ MatrixPolynomials.propagate_div_diff_sin_cos
 
 ## Bibliography
 
-- Caliari, M. (2007). Accurate evaluation of divided differences for
-  polynomial interpolation of exponential propagators. Computing,
-  80(2), 189–201. [DOI:
-  10.1007/s00607-007-0227-1](http://dx.doi.org/10.1007/s00607-007-0227-1)
+[^Caliari]: Caliari, M. (2007). Accurate evaluation of divided
+    differences for polynomial interpolation of exponential
+    propagators. Computing, 80(2), 189–201. [DOI:
+    10.1007/s00607-007-0227-1](http://dx.doi.org/10.1007/s00607-007-0227-1)
 
-- Kandolf, P., Ostermann, A., & Rainer, S. (2014). A residual based
-  error estimate for leja interpolation of matrix functions. Linear
-  Algebra and its Applications, 456(nil), 157–173. [DOI:
-  10.1016/j.laa.2014.04.023](http://dx.doi.org/10.1016/j.laa.2014.04.023)
+[^Kandolf]: Kandolf, P., Ostermann, A., & Rainer, S. (2014). A
+    residual based error estimate for Leja interpolation of matrix
+    functions. Linear Algebra and its Applications, 456(nil),
+    157–173. [DOI:
+    10.1016/j.laa.2014.04.023](http://dx.doi.org/10.1016/j.laa.2014.04.023)
 
-- McCurdy, A. C., Ng, K. C., & Parlett, B. N. (1984). Accurate
-  computation of divided differences of the exponential
-  function. Mathematics of Computation, 43(168), 501–501. [DOI:
-  10.1090/s0025-5718-1984-0758198-0](http://dx.doi.org/10.1090/s0025-5718-1984-0758198-0)
+[^McCurdy]: McCurdy, A. C., Ng, K. C., & Parlett,
+    B. N. (1984). Accurate computation of divided differences of the
+    exponential function. Mathematics of Computation, 43(168),
+    501–501. [DOI:
+    10.1090/s0025-5718-1984-0758198-0](http://dx.doi.org/10.1090/s0025-5718-1984-0758198-0)
 
-- Opitz, G. (1964). Steigungsmatrizen. ZAMM - Journal of Applied
-  Mathematics and Mechanics / Zeitschrift für Angewandte Mathematik
-  und Mechanik, 44(S1), [DOI:
-  10.1002/zamm.19640441321](http://dx.doi.org/10.1002/zamm.19640441321)
+[^Opitz]: Opitz, G. (1964). Steigungsmatrizen. ZAMM - Journal of
+    Applied Mathematics and Mechanics / Zeitschrift für Angewandte
+    Mathematik und Mechanik, 44(S1), [DOI:
+    10.1002/zamm.19640441321](http://dx.doi.org/10.1002/zamm.19640441321)
 
-- Zivcovich, F. (2019). Fast and accurate computation of divided
-  differences for analytic functions, with an application to the
-  exponential function. Dolomites Research Notes on Approximation,
-  12(1), 28–42. [PDF:
-  Zivcovich_2019_FAC.pdf](https://drna.padovauniversitypress.it/system/files/papers/Zivcovich_2019_FAC.pdf)
+[^Zivcovich]: Zivcovich, F. (2019). Fast and accurate computation of
+    divided differences for analytic functions, with an application to
+    the exponential function. Dolomites Research Notes on
+    Approximation, 12(1), 28–42. [PDF:
+    Zivcovich_2019_FAC.pdf](https://drna.padovauniversitypress.it/system/files/papers/Zivcovich_2019_FAC.pdf)
