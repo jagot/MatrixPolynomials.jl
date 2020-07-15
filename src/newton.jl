@@ -100,6 +100,11 @@ function NewtonMatrixPolynomial(np::NewtonPolynomial{T}, n::Integer, res=nothing
     NewtonMatrixPolynomial(np, pv, r, Ar, res, 0)
 end
 
+function Base.show(io::IO, nmp::NewtonMatrixPolynomial)
+    n = length(nmp.r)
+    write(io, "$(n)×$(n) matrix $(nmp.np)")
+end
+
 matvecs(nmp::NewtonMatrixPolynomial) = nmp.m + matvecs(nmp.error)
 
 estimate_converged!(::Nothing, args...) = false
@@ -112,7 +117,7 @@ Compute the action of the [`NewtonMatrixPolynomial`](@ref) `p`
 evaluated for the matrix (or linear operator) `A` acting on `v` and
 storing the result in `w`, i.e. `w ← p(A)*v`.
 """
-function LinearAlgebra.mul!(w, nmp::NewtonMatrixPolynomial, A, v)
+function LinearAlgebra.mul!(w, nmp::NewtonMatrixPolynomial, A, v, α::Number=true)
     # Equation numbers refer to
     #
     # - Kandolf, P., Ostermann, A., & Rainer, S. (2014). A residual based
@@ -136,6 +141,7 @@ function LinearAlgebra.mul!(w, nmp::NewtonMatrixPolynomial, A, v)
 
         # Equation (3b)
         mul!(Ar, A, r)
+        isone(α) || lmul!(α, Ar)
         nmp.m += 1
         lmul!(-ζ[i-1], r)
         r .+= Ar

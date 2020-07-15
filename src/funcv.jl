@@ -26,8 +26,8 @@ end
 scaling(::Function, λ) = 1
 shift(::Function, λ) = 0
 
-scale(A::AbstractMatrix, h) = h*A
-shift(A::AbstractMatrix, c) = A - I*c
+scale(A, h) = isone(h) ? A : h*A
+shift(A, c) = iszero(c) ? A : A - I*c
 
 """
     FuncV(f, A, m[, t=1; distribution=:leja, kwargs...])
@@ -40,8 +40,11 @@ the range over which `f` has to be interpolated.
 """
 function FuncV(f::Function, A, m::Integer, t=one(eltype(A));
                distribution=:leja, leja_multiplier=100,
-               tol=1e-15, kwargs...)
-    λ = spectral_range(t, A; kwargs...)
+               λ=nothing, scale_and_shift=true,
+               tol=1e-15, spectral_fun=identity, kwargs...)
+    if isnothing(λ)
+        λ = spectral_range(t, spectral_fun(A); kwargs...)
+    end
 
     ζ = if distribution == :leja
         points(Leja(range(λ, m*leja_multiplier), m))
@@ -51,10 +54,17 @@ function FuncV(f::Function, A, m::Integer, t=one(eltype(A));
         throw(ArgumentError("Invalid distribution of interpolation points $(distribution); valid choices are :leja and :fast_leja"))
     end
 
-    s = scaling(f, λ)
-    c = shift(f, λ)
+    At = scale(A, t)
 
-    s⁻¹Amc = scale(shift(scale(A, t), c), 1/s)
+    s,c,s⁻¹Amc = if scale_and_shift
+        s = scaling(f, λ)
+        c = shift(f, λ)
+
+        s⁻¹Amc = scale(shift(At, c), 1/s)
+        s,c,s⁻¹Amc
+    else
+        1, 0, At
+    end
 
     n = size(A,1)
     p = if n > 1
@@ -70,13 +80,17 @@ function FuncV(f::Function, A, m::Integer, t=one(eltype(A));
     FuncV(f, s⁻¹Amc, p, c, s)
 end
 
+function Base.show(io::IO, funcv::FuncV{f}) where f
+    write(io, "$(funcv.p) of $f")
+end
+
 # This does not yet consider substepping
 matvecs(f::FuncV) = matvecs(f.p)
 
 unshift!(w, funcv::FuncV) = @assert iszero(funcv.c)
 
-single_step!(w, funcv::FuncV, v) =
-    mul!(w, funcv.p, funcv.s⁻¹Amc, v)
+single_step!(w, funcv::FuncV, v, α::Number=true) =
+    mul!(w, funcv.p, funcv.s⁻¹Amc, v, α)
 
 """
     mul!(w, funcv::FuncV, v)
@@ -84,8 +98,8 @@ single_step!(w, funcv::FuncV, v) =
 Evaluate the action of the matrix polynomial `funcv` on `v` and store
 the result in `w`.
 """
-function LinearAlgebra.mul!(w, funcv::FuncV, v)
-    single_step!(w, funcv, v)
+function LinearAlgebra.mul!(w, funcv::FuncV, v, α::Number=true)
+    single_step!(w, funcv, v, α)
     unshift!(w, funcv)
 end
 
