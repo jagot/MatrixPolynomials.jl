@@ -2,9 +2,10 @@
     spectral_range(A[; ctol=√ε, verbosity=0])
 
 Estimate the spectral range of the matrix/linear operator `A` using
-[ArnoldiMethod.jl](https://github.com/haampie/ArnoldiMethod.jl), with
-`ctol` setting the tolerance for the Krylov iterations. Returns a
-spectral [`Shape`](@ref).
+[ArnoldiMethod.jl](https://github.com/haampie/ArnoldiMethod.jl). If
+the spectral range along the real/imaginary axis is smaller than
+`ctol`, it is compressed into a line. Returns a spectral
+[`Shape`](@ref).
 
 # Examples
 
@@ -68,6 +69,29 @@ function spectral_range(A; ctol=√(eps(real(eltype(A)))), verbosity=0, kwargs..
         # deduce that yet. The user is free to define such sloped
         # lines manually, though.
         Rectangle(a,b)
+    end
+end
+
+function spectral_range(A::SymTridiagonal{<:Real}; kwargs...)
+    n = size(A,1)
+    a,b = minmax(first(eigvals(A, 1:1)),
+                 first(eigvals(A, n:n)))
+    Line(a,b)
+end
+
+spectral_range(A::Diagonal{<:Real}; kwargs...) =
+    Line(minimum(A.diag), maximum(A.diag))
+
+function spectral_range(A::Diagonal{<:Complex}; kwargs...)
+    d = A.diag
+    rd = real(d)
+    id = imag(d)
+    a = minimum(rd) + im*minimum(id)
+    b = maximum(rd) + im*maximum(id)
+    if real(a) == real(b) || imag(a) == imag(b)
+        Line(a,b)
+    else
+        Rectangle(a, b)
     end
 end
 
