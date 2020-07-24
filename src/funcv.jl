@@ -21,6 +21,8 @@ struct FuncV{f,Op,P,C,S}
         new{f,Op,P,C,S}(s⁻¹Amc, p, c, s)
 end
 
+Base.size(f::FuncV, args...) = size(f.s⁻¹Amc, args...)
+
 # For arbitrary functions, we do not scale or shift, since there are
 # no universal scaling and/or shifting laws.
 scaling(::Function, λ) = 1
