@@ -130,7 +130,7 @@ function LinearAlgebra.mul!(w, nmp::NewtonMatrixPolynomial, A, v, α::Number=tru
 
     nmp.m = 0
 
-    pv .= d[1]*v # Equation (3c)
+    pv .= d[1] .* v # Equation (3c)
     r .= v # r is initialized using the normal iteration, below
     m = length(ζ)
     for i = 2:m
