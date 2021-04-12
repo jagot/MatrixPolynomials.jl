@@ -9,6 +9,7 @@ const lnΓ = loggamma
 using Statistics
 using UnicodeFun
 using Formatting
+using Compat
 
 include("spectral_shapes.jl")
 include("spectral_ranges.jl")
