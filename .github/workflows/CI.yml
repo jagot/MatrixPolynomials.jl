@@ -81,6 +81,6 @@ jobs:
           julia --project=docs -e '
             using Documenter: DocMeta, doctest
             using MatrixPolynomials
-            DocMeta.setdocmeta!(MatrixPolyonomials, :DocTestSetup, :(using MatrixPolynomials); recursive=true)
-            doctest(MatrixPolyonomials)'
+            DocMeta.setdocmeta!(MatrixPolynomials, :DocTestSetup, :(using MatrixPolynomials); recursive=true)
+            doctest(MatrixPolynomials)'
 
