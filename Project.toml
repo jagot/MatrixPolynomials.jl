@@ -20,7 +20,7 @@ Formatting = "0.4"
 Parameters = "0.12"
 SpecialFunctions = "1.3"
 UnicodeFun = "0.4"
-julia = "1.2"
+julia = "1.3"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
