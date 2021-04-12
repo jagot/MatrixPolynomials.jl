@@ -17,29 +17,6 @@ struct Leja{T}
 end
 
 """
-    argmax(f, itr)
-
-Two-argument version of `argmax`, i.e. returns the index corresponding
-to the maximum value of `f.(itr)`; taken from
-[JuliaLang/julia#27639](https://github.com/JuliaLang/julia/issues/27639#issuecomment-399518134)
-"""
-function Base.argmax(f, itr)
-    r = iterate(itr)
-    r === nothing && error("empty collection")
-    m, state = r
-    f_m = f(m)
-    while true
-        r = iterate(itr, state)
-        r === nothing && break
-        x, state = r
-        f_x = f(x)
-        isless(f_m, f_x) || continue
-        m, f_m = x, f_x
-    end
-    return m
-end
-
-"""
     leja!(l::Leja, n)
 
 Generate `n` Leja points in the [`Leja`](@ref) sequence `l`, i.e. can
