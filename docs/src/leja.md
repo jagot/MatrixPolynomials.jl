@@ -71,7 +71,6 @@ FastLeja{Float64}([2.0, -2.0, 0.0, -1.0, 1.0, -1.5, 1.5, 0.5, -1.75, 1.75], [-3.
 ```@docs
 MatrixPolynomials.Leja
 MatrixPolynomials.Leja(S::AbstractVector{T}, n::Integer) where T
-Base.argmax
 MatrixPolynomials.leja!
 MatrixPolynomials.FastLeja
 MatrixPolynomials.fast_leja!
