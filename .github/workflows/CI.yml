@@ -80,7 +80,7 @@ jobs:
         run: |
           julia --project=docs -e '
             using Documenter: DocMeta, doctest
-            using CompactBases
-            DocMeta.setdocmeta!(CompactBases, :DocTestSetup, :(using MatrixPolynomials); recursive=true)
-            doctest(CompactBases)'
+            using MatrixPolynomials
+            DocMeta.setdocmeta!(MatrixPolyonomials, :DocTestSetup, :(using MatrixPolynomials); recursive=true)
+            doctest(MatrixPolyonomials)'
 
