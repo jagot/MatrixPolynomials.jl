@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>φₖ functions · MatrixPolynomials.jl</title><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.0/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.0/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.0/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.11.1/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script><script src="../assets/latex.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit">MatrixPolynomials.jl</span></div><form class="docs-search" action="../search/"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li><a class="tocitem" href="../">Home</a></li><li><a class="tocitem" href="../funcv/">Functions of matrices</a></li><li><a class="tocitem" href="../leja/">Leja points</a></li><li><a class="tocitem" href="../divided_differences/">Divided differences</a></li><li><a class="tocitem" href="../newton_polynomials/">Newton polynomials</a></li><li class="is-active"><a class="tocitem" href>φₖ functions</a><ul class="internal"><li><a class="tocitem" href="#Definition"><span>Definition</span></a></li><li><a class="tocitem" href="#Accuracy"><span>Accuracy</span></a></li><li><a class="tocitem" href="#Reference"><span>Reference</span></a></li></ul></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li class="is-active"><a href>φₖ functions</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>φₖ functions</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="https://github.com/jagot/MatrixPolynomials.jl/blob/master/docs/src/phi_functions.md#L" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><h1 id="φₖ-functions"><a class="docs-heading-anchor" href="#φₖ-functions">φₖ functions</a><a id="φₖ-functions-1"></a><a class="docs-heading-anchor-permalink" href="#φₖ-functions" title="Permalink"></a></h1><h2 id="Definition"><a class="docs-heading-anchor" href="#Definition">Definition</a><a id="Definition-1"></a><a class="docs-heading-anchor-permalink" href="#Definition" title="Permalink"></a></h2><p>These are defined recursively through</p><p class="math-container">\[\begin{equation}
+\label{eqn:phi-k-recursive}
+\varphi_0(z) \defd \ce^z, \quad
+\varphi_1(z) \defd \frac{\ce^z-1}{z}, \quad
+\varphi_{k+1}(z) \defd \frac{\varphi_k(z)-\varphi_k(0)}{z}, \quad
+\varphi_k(0)=\frac{1}{k!}.
+\end{equation}\]</p><p>An alternate definition is</p><p class="math-container">\[\begin{equation}
+h^k \varphi_k(hz) = \int_0^h \diff{s}
+\ce^{(h-s)z} \frac{s^{k-1}}{(k-1)!}.
+\end{equation}\]</p><h2 id="Accuracy"><a class="docs-heading-anchor" href="#Accuracy">Accuracy</a><a id="Accuracy-1"></a><a class="docs-heading-anchor-permalink" href="#Accuracy" title="Permalink"></a></h2><h3 id="Accuracy-for-k1"><a class="docs-heading-anchor" href="#Accuracy-for-k1">Accuracy for <span>$k=1$</span></a><a id="Accuracy-for-k1-1"></a><a class="docs-heading-anchor-permalink" href="#Accuracy-for-k1" title="Permalink"></a></h3><p class="math-container">\[\begin{equation}
+\label{eqn:phi-1-naive}
+\varphi_1(z) \equiv \frac{\ce^z-1}{z}
+\end{equation}\]</p><p>This is a common example of catastrophic cancellation; for small <span>$\abs{z}$</span>, <span>$\ce^z - 1\approx 0$</span>, and we thus divide a small number by a small number. By employing a trick shown by e.g.</p><pre><code class="language-none">Higham, N. (2002). Accuracy and stability of numerical
+algorithms. Philadelphia: Society for Industrial and Applied
+Mathematics.</code></pre><p>we can substantially improve accuracy:</p><p class="math-container">\[\begin{equation}
+\label{eqn:phi-1-accurate}
+\varphi_1(z) = \begin{cases}
+1, &amp; \abs{z} &lt; \varepsilon,\\
+\frac{\ce^z-1}{\log\ce^z}, &amp; \varepsilon &lt; \abs{z} &lt; 1, \\
+\frac{\ce^z-1}{z}, &amp; \textrm{else}.
+\end{cases}
+\end{equation}\]</p><p><img src="../figures/phi_1_accuracy.svg" alt="Illustration of φ₁ accuracy"/></p><p>The solid line corresponds to the naïve implementation <span>$\eqref{eqn:phi-1-naive}$</span>, whereas the dashed line corresponds to the accurate implementation <span>$\eqref{eqn:phi-1-accurate}$</span>.</p><h3 id="Accuracy-for-k-1"><a class="docs-heading-anchor" href="#Accuracy-for-k-1">Accuracy for <span>$k &gt; 1$</span></a><a id="Accuracy-for-k-1-1"></a><a class="docs-heading-anchor-permalink" href="#Accuracy-for-k-1" title="Permalink"></a></h3><p>For a Taylor expansion of a function <span>$f(x)$</span>, we have</p><p class="math-container">\[\begin{equation}
+f(x-a) = \underbrace{\sum_{i=0}^n \frac{f^{(i)}(a)}{i!} (x-a)^i}_{\defd T_n(x)} +
+\underbrace{\frac{f^{(n+1)}(\xi)}{(n+1)!}(x-a)^{n+1}}_{\defd R_n(x)}, \quad
+\xi \in [a,x]
+\end{equation}\]</p><p>We now Taylor expand <span>$\ce^{(h-s)z}$</span> about <span>$z=0$</span>:</p><p class="math-container">\[\begin{equation}
+\ce^{(h-s)z} =
+\sum_{i=0}^n \frac{z^i(h-s)^i}{i!} +
+\frac{\ce^{(h-s)\zeta}\zeta^{n+1}(h-s)^{n+1}}{(n+1)!},
+\quad \abs{\zeta} \leq z.
+\end{equation}\]</p><p>With this, we now calculate the definite integral appearing in the definition of <span>$\varphi_k$</span>:</p><p class="math-container">\[\begin{equation}
+\begin{aligned}
+\int_0^h\diff{s}
+\ce^{(h-s)z} s^{k-1}
+&amp;=
+\int_0^h\diff{s}
+\sum_{i=0}^n \frac{z^i(h-s)^is^{k-1}}{i!} +
+\int_0^h\diff{s}
+\frac{\ce^{(h-s)\zeta}\zeta^{n+1}(h-s)^{n+1}s^{k-1}}{(n+1)!} \\
+&amp;=
+\sum_{i=0}^n
+\frac{z^i}{i!}
+\int_0^h\diff{s}
+(h-s)^is^{k-1} +
+\int_0^h\diff{s}
+\frac{\ce^{(h-s)\zeta}\zeta^{n+1}(h-s)^{n+1}s^{k-1}}{(n+1)!}.
+\end{aligned}
+\end{equation}\]</p><p>For the case we are interested in, <span>$h=1$</span> and the first integral is equivalent to <a href="https://en.wikipedia.org/wiki/Beta_function">Euler&#39;s beta function</a>:</p><p class="math-container">\[\begin{equation}
+\int_0^1\diff{s} s^{k-1}(1-s)^i \equiv \Beta(k,i+1) \equiv \frac{\Gamma(k)\Gamma(i+1)}{\Gamma(k+i+1)},
+\end{equation}\]</p><p>which, for integer <span>$k,i$</span> has the following value</p><p class="math-container">\[\begin{equation}
+\Beta(k,i+1) = \frac{(k-1)!i!}{(k+i)!}.
+\end{equation}\]</p><p>Inserting this into the integral (having set <span>$h=1$</span>), we find</p><p class="math-container">\[\begin{equation}
+\label{eqn:phi-k-expansion}
+\varphi_k(z) =
+\sum_{i=0}^n
+\frac{z^{i}}{(k+i)!}
++\int_0^1\diff{s} R_n(s,\zeta),
+\end{equation}\]</p><p>where we have made explicit the dependence of the <a href="https://en.wikipedia.org/wiki/Taylor%27s_theorem#Explicit_formulas_for_the_remainder">Lagrange remainder</a> <span>$R_n(s,\zeta)$</span> on <span>$s$</span>.</p><p>Some numerical testing seems to indicate it is enough to set <span>$n=k$</span> in the Taylor expansion <span>$\eqref{eqn:phi-k-expansion}$</span> to get accurate evaluation of <span>$\phi_k(x)$</span> for small <span>$\abs{x}$</span>, <span>$x\in\mathbb{R}$</span>. For general <span>$z$</span>, the amount of required terms seems higher, so <span>$n$</span> is currently set to <span>$10k$</span>.</p><p><img src="../figures/phi_k_accuracy.svg" alt="Illustration of φ₁ accuracy"/></p><p>The plot includes <span>$\phi_k(z)$</span> for <span>$k\in\{0..100\}$</span>. To illustrate the rounding errors that would occur if one were to use the recursive definition <span>$\eqref{eqn:phi-k-recursive}$</span> directly , we plot <span>$\varphi_k(x)$</span>, but for <span>$k\in\{0..4\}$</span> only:</p><p><img src="../figures/phi_k_naive_accuracy.svg" alt="Illustration of φ₁ accuracy"/></p><h2 id="Reference"><a class="docs-heading-anchor" href="#Reference">Reference</a><a id="Reference-1"></a><a class="docs-heading-anchor-permalink" href="#Reference" title="Permalink"></a></h2><article class="docstring"><header><a class="docstring-binding" id="MatrixPolynomials.φ₁" href="#MatrixPolynomials.φ₁"><code>MatrixPolynomials.φ₁</code></a> — <span class="docstring-category">Function</span></header><section><div><pre><code class="language-julia">φ₁(z)</code></pre><p>Special case of <a href="#MatrixPolynomials.φ"><code>φ</code></a> for <code>k=1</code>, taking care to avoid numerical rounding errors for small <span>$|z|$</span>.</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/jagot/MatrixPolynomials.jl/blob/f5587bb69b31cac2d635d9d1c0199076b287e075/src/phi_functions.jl#LL1-L6">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="MatrixPolynomials.φ" href="#MatrixPolynomials.φ"><code>MatrixPolynomials.φ</code></a> — <span class="docstring-category">Function</span></header><section><div><pre><code class="language-julia">φ(k, z)</code></pre><p>Compute the entire function <span>$\varphi_k(z)$</span>, <span>$z\in\mathbb{C}$</span>, which is recursively defined as [Eq. (2.11) of <a href="http://dx.doi.org/10.1017/s0962492910000048">Hochbruck2010</a>]</p><p class="math-container">\[\varphi_{k+1}(z) \equiv \frac{\varphi_k(z)-\varphi_k(0)}{z},\]</p><p>with the base cases</p><p class="math-container">\[\varphi_{0}(z) = \exp(z), \quad
+\varphi_{1}(z) = \frac{\exp(z)-1}{z},\]</p><p>and the special case</p><p class="math-container">\[\varphi_k(0) = \frac{1}{k!}.\]</p><p>This function, as the base case <a href="#MatrixPolynomials.φ₁"><code>φ₁</code></a>, is implemented to avoid rounding errors for small <span>$|z|$</span>.</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/jagot/MatrixPolynomials.jl/blob/f5587bb69b31cac2d635d9d1c0199076b287e075/src/phi_functions.jl#LL20-L41">source</a></section><section><div><pre><code class="language-none">φ(k)</code></pre><p>Return a function corresponding to <code>φₖ</code>.</p><p><strong>Examples</strong></p><pre><code class="language-julia-repl">julia&gt; φ(0)
+exp (generic function with 14 methods)
+
+julia&gt; φ(1)
+φ₁ (generic function with 1 method)
+
+julia&gt; φ(2)
+φ₂ (generic function with 1 method)
+
+julia&gt; φ(15)
+φ₁₅ (generic function with 1 method)
+
+julia&gt; φ(15)(5.0 + im)
+1.0931836313419128e-12 + 9.301475570434819e-14im</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/jagot/MatrixPolynomials.jl/blob/f5587bb69b31cac2d635d9d1c0199076b287e075/src/phi_functions.jl#LL71-L94">source</a></section></article></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../newton_polynomials/">« Newton polynomials</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Thursday 15 April 2021 09:44">Thursday 15 April 2021</span>. Using Julia version 1.6.0.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
