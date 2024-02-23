@@ -100,7 +100,7 @@ end
     @testset "Matrix polynomials" begin
         @testset "Inhomogeneous coupled ODEs, $kind" for (kind,m,tol) in [(:real,43,1e-12), (:complex,60,1e-12)]
             n = 10 # Number of ODEs
-            Y₀ = 1.0*ones(n)
+            Y₀ = 1.0*ones(kind == :real ? Float64 : ComplexF64, n)
             G = -3*ones(n) # Inhomogeneous terms
 
             n_discr = 1000 # Number of points spanning eigenspectrum interval

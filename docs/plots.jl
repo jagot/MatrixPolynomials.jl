@@ -1,4 +1,4 @@
-using PyPlot
+using PythonPlot
 using Jagot.plotting
 plot_style("ggplot")
 

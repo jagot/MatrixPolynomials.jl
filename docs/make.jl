@@ -14,10 +14,11 @@ makedocs(;
         "Newton polynomials" => "newton_polynomials.md",
         "φₖ functions" => "phi_functions.md",
     ],
-    repo="https://github.com/jagot/MatrixPolynomials.jl/blob/{commit}{path}#L{line}",
+    repo=Remotes.GitHub("jagot", "MatrixPolynomials.jl"),
     sitename="MatrixPolynomials.jl",
     authors="Stefanos Carlström <stefanos.carlstrom@gmail.com>",
     doctest=false,
+    checkdocs=:exports
 )
 
 deploydocs(;

@@ -34,12 +34,12 @@ interpolation points.
 
 MatrixPolynomials.jl provides two methods for generating the Leja
 points, [`MatrixPolynomials.Leja`](@ref) and
-[`MatrixPolynomials.FastLeja`](@ref). The figure below illustrates the
-distribution of Leja points using both methods, on the line
-``[-2,2]``, for the [`MatrixPolynomials.Leja`](@ref), an underlying
-discretization of 1000 points was employed, and 10 Leja points were
-generated. The lower part of the plot shows the estimation of the
-[capacity](https://en.wikipedia.org/wiki/Capacity_of_a_set),
+[`MatrixPolynomials.FastLeja`](@ref)[^Baglama]. The figure below
+illustrates the distribution of Leja points using both methods, on the
+line ``[-2,2]``, for the [`MatrixPolynomials.Leja`](@ref), an
+underlying discretization of 1000 points was employed, and 10 Leja
+points were generated. The lower part of the plot shows the estimation
+of the [capacity](https://en.wikipedia.org/wiki/Capacity_of_a_set),
 calculated as
 ```math
 C(\{\zeta_{1:m}\}) \approx

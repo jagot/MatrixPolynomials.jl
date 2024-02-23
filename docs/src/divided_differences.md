@@ -56,7 +56,7 @@ i.e. the first row of the function ``f`` applied to the matrix
 &&&&\zeta_j}.
 \end{equation}
 ```
-The right-eigenvectors are given by [Opitz]
+The right-eigenvectors are given by [^Opitz]
 ```math
 \begin{equation}
 \label{eqn:div-diff-mat-right-eigen}
@@ -267,12 +267,6 @@ MatrixPolynomials.propagate_div_diff_sin_cos
     differences for polynomial interpolation of exponential
     propagators. Computing, 80(2), 189–201. [DOI:
     10.1007/s00607-007-0227-1](http://dx.doi.org/10.1007/s00607-007-0227-1)
-
-[^Kandolf]: Kandolf, P., Ostermann, A., & Rainer, S. (2014). A
-    residual based error estimate for Leja interpolation of matrix
-    functions. Linear Algebra and its Applications, 456(nil),
-    157–173. [DOI:
-    10.1016/j.laa.2014.04.023](http://dx.doi.org/10.1016/j.laa.2014.04.023)
 
 [^McCurdy]: McCurdy, A. C., Ng, K. C., & Parlett,
     B. N. (1984). Accurate computation of divided differences of the

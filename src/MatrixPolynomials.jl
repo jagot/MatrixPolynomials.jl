@@ -3,6 +3,7 @@ module MatrixPolynomials
 using Parameters
 using LinearAlgebra
 using ArnoldiMethod
+using ArnoldiMethod: SR, SI, LR, LI
 using SpecialFunctions
 const Γ = gamma
 const lnΓ = loggamma
