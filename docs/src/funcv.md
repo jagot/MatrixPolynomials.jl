@@ -10,6 +10,7 @@ LinearAlgebra.mul!(w, funcv::MatrixPolynomials.FuncV, v)
 
 ```@docs
 MatrixPolynomials.spectral_range
+MatrixPolynomials.hermitian_spectral_range
 ```
 
 ### Shapes
